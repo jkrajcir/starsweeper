@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<style scoped>
+<style>
 .game-header-container {
   display: flex;
   column-gap: 4rem;

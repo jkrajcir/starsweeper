@@ -30,6 +30,13 @@ header {
   font-weight: bold;
   font-size: 2rem;
 }
+
+main {
+  display: flex;
+  flex-direction: column;
+  row-gap: 3rem;
+}
+
 /* header {
   line-height: 1.5;
 }
