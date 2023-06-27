@@ -2,7 +2,7 @@
 import Tile from './Tile.vue'
 import { TileProperties } from '@/modules/TileProperties.mjs'
 import { TileStatus, TileType } from '@/modules/TileEnums.mjs'
-import { ref } from 'vue'
+import { reactive } from 'vue'
 </script>
 
 <script setup lang="ts">
@@ -19,10 +19,15 @@ for (const starCoordinates of starCoordinatesSet) {
   const starX: number = Number.parseInt(starCoordinatesArr[0])
   const starY: number = Number.parseInt(starCoordinatesArr[1])
 
-  checkAdjacentCoordinates(starX, starY, starCoordinatesSet, {
-    callbackParam: coordinatesToStarCount,
-    callback: setCoordinatesStarCount
-  })
+  const adjacentCoordinates = getAdjacentCoordinates(starX, starY, starCoordinatesSet)
+
+  for (const adjacentCoordinate of adjacentCoordinates) {
+    const adjacentCoordinatesArr = adjacentCoordinate.split(',')
+    const adjacentX = Number.parseInt(adjacentCoordinatesArr[0])
+    const adjacentY = Number.parseInt(adjacentCoordinatesArr[1])
+
+    setCoordinatesStarCount(coordinatesToStarCount, [adjacentX, adjacentY])
+  }
 }
 
 function setCoordinatesStarCount(
@@ -56,34 +61,117 @@ for (let x = 0; x < 9; x++) {
   }
 }
 
-const refTileCoordinatesToTileProps = ref(tileCoordinatesToTileProps)
+const state = reactive({ tileCoordinatesToTileProps })
 
-function tileClick(tileCoordinates: string) {
-  const clickedTileProps = refTileCoordinatesToTileProps.value.get(tileCoordinates)
+function getTileCoordinatesToOpen(
+  tileCoordinatesToOpenSet: Set<string>,
+  tileCoordinatesToOpenArr: [x: number, y: number]
+): void {
+  const tileCoordinatesToOpen: string = `${tileCoordinatesToOpenArr[0]},${tileCoordinatesToOpenArr[1]}`
+  tileCoordinatesToOpenSet.add(tileCoordinatesToOpen)
 
-  if (
-    typeof clickedTileProps !== 'undefined' &&
-    clickedTileProps.tileStatus !== TileStatus.Flagged
-  ) {
+  const tilePropsToOpen = state.tileCoordinatesToTileProps.get(tileCoordinatesToOpen)
+
+  if (typeof tilePropsToOpen !== 'undefined' && tilePropsToOpen.tileType === TileType.Empty) {
+    const adjacentTileToOpenCoordinates = getAdjacentCoordinates(
+      tileCoordinatesToOpenArr[0],
+      tileCoordinatesToOpenArr[1],
+      tileCoordinatesToOpenSet
+    )
+
+    for (const adjacentTileToOpenCoordinate of adjacentTileToOpenCoordinates) {
+      const adjacentTileToOpenCoordinateArr = adjacentTileToOpenCoordinate.split(',')
+      const adjacentX = Number.parseInt(adjacentTileToOpenCoordinateArr[0])
+      const adjacentY = Number.parseInt(adjacentTileToOpenCoordinateArr[1])
+
+      getTileCoordinatesToOpen(tileCoordinatesToOpenSet, [adjacentX, adjacentY])
+    }
+  }
+}
+
+/**
+ * This function checks all adjacent Tiles from "center" tile.
+ * Then, for each adjacent that isn't already in coordinateSet, invoke callbacks
+ * @param x x-coordinate of "center" Tile
+ * @param y y-coordinate of "center" Tile
+ * @param visitedCoordinates set of coordinates that have already been visited
+ */
+function getAdjacentCoordinates(
+  x: number,
+  y: number,
+  visitedCoordinates: Set<string>
+): Set<string> {
+  const adjacentX1: number = x + 1
+  const adjacentXn1: number = x - 1
+  const adjacentY1: number = y + 1
+  const adjacentYn1: number = y - 1
+
+  const adjacentCoordinatesArr = new Set<string>()
+
+  if (adjacentX1 <= 8) {
+    if (!visitedCoordinates.has(`${adjacentX1},${y}`)) {
+      adjacentCoordinatesArr.add(`${adjacentX1},${y}`)
+    }
+    if (adjacentY1 <= 8 && !visitedCoordinates.has(`${adjacentX1},${adjacentY1}`)) {
+      adjacentCoordinatesArr.add(`${adjacentX1},${adjacentY1}`)
+    }
+    if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${adjacentX1},${adjacentYn1}`)) {
+      adjacentCoordinatesArr.add(`${adjacentX1},${adjacentYn1}`)
+    }
+  }
+  if (adjacentXn1 >= 0) {
+    if (!visitedCoordinates.has(`${adjacentXn1},${y}`)) {
+      adjacentCoordinatesArr.add(`${adjacentXn1},${y}`)
+    }
+    if (adjacentY1 <= 8 && !visitedCoordinates.has(`${adjacentXn1},${adjacentY1}`)) {
+      adjacentCoordinatesArr.add(`${adjacentXn1},${adjacentY1}`)
+    }
+    if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${adjacentXn1},${adjacentYn1}`)) {
+      adjacentCoordinatesArr.add(`${adjacentXn1},${adjacentYn1}`)
+    }
+  }
+  if (adjacentY1 <= 8 && !visitedCoordinates.has(`${x},${adjacentY1}`)) {
+    adjacentCoordinatesArr.add(`${x},${adjacentY1}`)
+  }
+  if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${x},${adjacentYn1}`)) {
+    adjacentCoordinatesArr.add(`${x},${adjacentYn1}`)
+  }
+
+  return adjacentCoordinatesArr
+}
+
+function getTileCoordinatesFromMouseEvent(mouseEvent: MouseEvent) {
+  const elements = document.elementsFromPoint(mouseEvent.pageX, mouseEvent.pageY)
+  for (const element of elements) {
+    const dataset = (element as HTMLElement).dataset
+    if (typeof dataset !== 'undefined' && typeof dataset.coordinates !== 'undefined') {
+      return dataset.coordinates
+    }
+  }
+}
+
+function gameBoardClick(mouseEvent: MouseEvent) {
+  const tileCoordinates = getTileCoordinatesFromMouseEvent(mouseEvent)
+  if (typeof tileCoordinates === 'undefined') {
+    return
+  }
+
+  const clickedTileProps = state.tileCoordinatesToTileProps.get(tileCoordinates)
+
+  if (typeof clickedTileProps === 'undefined') {
+    return
+  }
+
+  if (clickedTileProps.tileStatus !== TileStatus.Flagged) {
     clickedTileProps.tileStatus = TileStatus.Opened
 
     if (clickedTileProps.tileType === TileType.Empty) {
       const tileCoordinatesToOpenSet: Set<string> = new Set<string>()
 
-      checkAdjacentCoordinates(
-        clickedTileProps.x,
-        clickedTileProps.y,
-        tileCoordinatesToOpenSet,
-        undefined,
-        {
-          callbackParam: tileCoordinatesToOpenSet,
-          callback: getTileCoordinatesToOpen
-        }
-      )
+      getTileCoordinatesToOpen(tileCoordinatesToOpenSet, [clickedTileProps.x, clickedTileProps.y])
 
       for (const tileCoordinatesToOpen of tileCoordinatesToOpenSet) {
-        const tilePropsToOpen = refTileCoordinatesToTileProps.value.get(tileCoordinatesToOpen)
-
+        const tilePropsToOpen = state.tileCoordinatesToTileProps.get(tileCoordinatesToOpen)
         if (typeof tilePropsToOpen !== 'undefined') {
           tilePropsToOpen.tileStatus = TileStatus.Opened
         }
@@ -94,126 +182,90 @@ function tileClick(tileCoordinates: string) {
   }
 }
 
-function tileRightClick(tileCoordinates: string) {
-  const clickedTileProps = refTileCoordinatesToTileProps.value.get(tileCoordinates)
+function gameBoardMiddleClick(mousedown: boolean, mouseEvent: MouseEvent) {
+  if (mousedown) {
+    highlightAdjacentTiles(mouseEvent)
+    document.addEventListener('mousemove', highlightAdjacentTiles)
+  } else {
+    document.removeEventListener('mousemove', highlightAdjacentTiles)
+    highlightAdjacentTiles()
+  }
+}
 
-  if (typeof clickedTileProps !== 'undefined') {
-    if (clickedTileProps.tileStatus === TileStatus.Unopened) {
-      clickedTileProps.tileStatus = TileStatus.Flagged
-    } else if (clickedTileProps.tileStatus === TileStatus.Flagged) {
-      clickedTileProps.tileStatus = TileStatus.Unopened
+function highlightAdjacentTiles(mouseEvent: MouseEvent | undefined = undefined) {
+  for (const tileProps of state.tileCoordinatesToTileProps.values()) {
+    if (tileProps.tileStatus === TileStatus.Highlighted) {
+      tileProps.tileStatus = TileStatus.Unopened
+    }
+  }
+
+  if (typeof mouseEvent === 'undefined') {
+    return
+  }
+
+  const tileCoordinates = getTileCoordinatesFromMouseEvent(mouseEvent)
+  if (typeof tileCoordinates === 'undefined') {
+    return
+  }
+
+  const tileCoordinatesArr = tileCoordinates.split(',')
+  const tileX = Number.parseInt(tileCoordinatesArr[0])
+  const tileY = Number.parseInt(tileCoordinatesArr[1])
+  const tilesToHighlightCoordinates = getAdjacentCoordinates(tileX, tileY, new Set<string>())
+
+  for (const tileToHighlightCoordinate of tilesToHighlightCoordinates) {
+    const tileToHighlightProps = state.tileCoordinatesToTileProps.get(tileToHighlightCoordinate)
+    if (
+      typeof tileToHighlightProps !== 'undefined' &&
+      tileToHighlightProps.tileStatus === TileStatus.Unopened
+    ) {
+      tileToHighlightProps.tileStatus = TileStatus.Highlighted
     }
   }
 }
 
-function getTileCoordinatesToOpen(
-  tileCoordinatesToOpenSet: Set<string>,
-  tileCoordinatesToOpenArr: [x: number, y: number]
-): void {
-  const tileCoordinatesToOpen: string = `${tileCoordinatesToOpenArr[0]},${tileCoordinatesToOpenArr[1]}`
-  tileCoordinatesToOpenSet.add(tileCoordinatesToOpen)
-
-  const tilePropsToOpen = refTileCoordinatesToTileProps.value.get(tileCoordinatesToOpen)
-  if (typeof tilePropsToOpen !== 'undefined' && tilePropsToOpen.tileType === TileType.Empty) {
-    checkAdjacentCoordinates(
-      tileCoordinatesToOpenArr[0],
-      tileCoordinatesToOpenArr[1],
-      tileCoordinatesToOpenSet,
-      undefined,
-      { callbackParam: tileCoordinatesToOpenSet, callback: getTileCoordinatesToOpen }
-    )
-  }
-}
-
-/**
- * This function checks all adjacent Tiles from "center" tile.
- * Then, for each adjacent that isn't already in coordinateSet, invoke callbacks
- * @param x x-coordinate of "center" Tile
- * @param y y-coordinate of "center" Tile
- * @param visitedCoordinates set of coordinates that have already been visited
- * @param setCoordinatesStarCount
- * @param getTileCoordinatesToOpen
- */
-function checkAdjacentCoordinates(
-  x: number,
-  y: number,
-  visitedCoordinates: Set<string>,
-  setCoordinatesStarCount?: {
-    callbackParam: Map<string, number>
-    callback: (
-      coordinatesToStarCount: Map<string, number>,
-      coordinatesArr: [x: number, y: number]
-    ) => void
-  },
-  getTileCoordinatesToOpen?: {
-    callbackParam: Set<string>
-    callback: (
-      tileCoordinatesToOpenSet: Set<string>,
-      tileCoordinatesToOpenArr: [x: number, y: number]
-    ) => void
-  }
-) {
-  const adjacentX1: number = x + 1
-  const adjacentXn1: number = x - 1
-  const adjacentY1: number = y + 1
-  const adjacentYn1: number = y - 1
-
-  let adjacentCoordinatesArr: [x: number, y: number][] = []
-
-  if (adjacentX1 <= 8) {
-    if (!visitedCoordinates.has(`${adjacentX1},${y}`)) {
-      adjacentCoordinatesArr.push([adjacentX1, y])
-    }
-    if (adjacentY1 <= 8 && !visitedCoordinates.has(`${adjacentX1},${adjacentY1}`)) {
-      adjacentCoordinatesArr.push([adjacentX1, adjacentY1])
-    }
-    if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${adjacentX1},${adjacentYn1}`)) {
-      adjacentCoordinatesArr.push([adjacentX1, adjacentYn1])
-    }
-  }
-  if (adjacentXn1 >= 0) {
-    if (!visitedCoordinates.has(`${adjacentXn1},${y}`)) {
-      adjacentCoordinatesArr.push([adjacentXn1, y])
-    }
-    if (adjacentY1 <= 8 && !visitedCoordinates.has(`${adjacentXn1},${adjacentY1}`)) {
-      adjacentCoordinatesArr.push([adjacentXn1, adjacentY1])
-    }
-    if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${adjacentXn1},${adjacentYn1}`)) {
-      adjacentCoordinatesArr.push([adjacentXn1, adjacentYn1])
-    }
-  }
-  if (adjacentY1 <= 8 && !visitedCoordinates.has(`${x},${adjacentY1}`)) {
-    adjacentCoordinatesArr.push([x, adjacentY1])
-  }
-  if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${x},${adjacentYn1}`)) {
-    adjacentCoordinatesArr.push([x, adjacentYn1])
+function gameBoardRightClick(mouseEvent: MouseEvent) {
+  const tileCoordinates = getTileCoordinatesFromMouseEvent(mouseEvent)
+  if (typeof tileCoordinates === 'undefined') {
+    return
   }
 
-  for (const adjacentCoordinates of adjacentCoordinatesArr) {
-    setCoordinatesStarCount?.callback(setCoordinatesStarCount.callbackParam, adjacentCoordinates)
-    getTileCoordinatesToOpen?.callback(getTileCoordinatesToOpen.callbackParam, adjacentCoordinates)
+  const clickedTileProps = state.tileCoordinatesToTileProps.get(tileCoordinates)
+  if (typeof clickedTileProps === 'undefined') {
+    return
+  }
+
+  if (clickedTileProps.tileStatus === TileStatus.Unopened) {
+    clickedTileProps.tileStatus = TileStatus.Flagged
+  } else if (clickedTileProps.tileStatus === TileStatus.Flagged) {
+    clickedTileProps.tileStatus = TileStatus.Unopened
   }
 }
 </script>
 
 <template>
-  <div class="game-board">
+  <div
+    @click.left="gameBoardClick($event)"
+    @mousedown.middle.prevent="gameBoardMiddleClick(true, $event)"
+    @mouseup.middle.prevent="gameBoardMiddleClick(false, $event)"
+    @mouseleave="gameBoardMiddleClick(false, $event)"
+    @click.right.prevent="gameBoardRightClick($event)"
+    class="game-board"
+  >
     <Tile
-      @tile-click="tileClick"
-      @tile-right-click="tileRightClick"
-      v-for="(tileProps, index) of refTileCoordinatesToTileProps.values()"
+      v-for="(tileProps, index) of state.tileCoordinatesToTileProps.values()"
       :key="index"
       :tile-props="tileProps"
     />
   </div>
 </template>
 
-<style scoped>
+<style>
 .game-board {
   display: grid;
   grid-template-columns: repeat(9, 35px);
   grid-template-rows: repeat(9, 35px);
-  justify-content: center;
-  margin-top: 5rem;
+  width: fit-content;
+  margin: 0 auto;
 }
 </style>

@@ -37,7 +37,10 @@ const { tileProps } = props
 const classObject = computed(() => ({
   opened: tileProps.tileStatus === TileStatus.Opened,
   unopened:
-    tileProps.tileStatus === TileStatus.Unopened || tileProps.tileStatus === TileStatus.Flagged,
+    tileProps.tileStatus === TileStatus.Unopened ||
+    tileProps.tileStatus === TileStatus.Flagged ||
+    tileProps.tileStatus === TileStatus.Highlighted,
+  highlighted: tileProps.tileStatus === TileStatus.Highlighted,
   flagged: tileProps.tileStatus === TileStatus.Flagged
 }))
 
@@ -45,45 +48,11 @@ const styleObject = computed(() => ({
   color:
     tileProps.tileStatus === TileStatus.Opened ? starCountToColor[tileProps.starCount - 1] : 'unset'
 }))
-
-const emit = defineEmits({
-  tileClick: (tileCoordinates: string) => {
-    if (tileCoordinates) {
-      return true
-    } else {
-      return false
-    }
-  },
-  tileRightClick: (tileCoordinates: string) => {
-    if (tileCoordinates) {
-      return true
-    } else {
-      return false
-    }
-  }
-})
-
-function buttonClick(tileProps: TileProperties) {
-  if (tileProps.tileStatus !== TileStatus.Flagged) {
-    emit('tileClick', tileProps.coordinates)
-  }
-}
-
-function buttonMiddleDown() {}
-
-function buttonMiddleUp() {}
-
-function buttonRightClick(tileCoordinates: string) {
-  emit('tileRightClick', tileCoordinates)
-}
 </script>
 
 <template>
   <button
-    @click.left="buttonClick(tileProps)"
-    @mousedown.middle.prevent="buttonMiddleDown()"
-    @mouseup.middle.prevent="buttonMiddleUp()"
-    @click.right.prevent="buttonRightClick(tileProps.coordinates)"
+    :data-coordinates="tileProps.coordinates"
     class="tile"
     :class="classObject"
     :style="styleObject"
@@ -122,7 +91,14 @@ function buttonRightClick(tileCoordinates: string) {
 .unopened {
   background-color: darkolivegreen;
 
-  &:not(.flagged):active {
+  &:not(.flagged) {
+    &:active,
+    &:hover {
+      background-color: olivedrab;
+    }
+  }
+
+  &.highlighted {
     background-color: olivedrab;
   }
 }
