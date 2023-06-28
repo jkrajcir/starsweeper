@@ -34,7 +34,8 @@ const { tileProps } = defineProps<{
 }>()
 
 const classObject = computed(() => ({
-  opened: tileProps.tileStatus === TileStatus.Opened,
+  opened: tileProps.tileStatus === TileStatus.Opened && !tileProps.starOpened,
+  'star-opened': tileProps.starOpened,
   unopened:
     tileProps.tileStatus === TileStatus.Unopened ||
     tileProps.tileStatus === TileStatus.Flagged ||
@@ -104,5 +105,9 @@ const styleObject = computed(() => ({
 
 .opened {
   background-color: tan;
+}
+
+.star-opened {
+  background-color: crimson;
 }
 </style>

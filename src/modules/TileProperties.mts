@@ -7,6 +7,7 @@ class TileProperties {
   private _tileType: TileType
   private _starCount: number
   private _tileStatus: TileStatus
+  private _starOpened: boolean
 
   constructor(x: number, y: number) {
     this._x = x
@@ -15,6 +16,7 @@ class TileProperties {
     this._tileType = TileType.Empty
     this._starCount = 0
     this._tileStatus = TileStatus.Unopened
+    this._starOpened = false
   }
 
   public get x(): number {
@@ -48,6 +50,13 @@ class TileProperties {
   }
   public set tileStatus(value: TileStatus) {
     this._tileStatus = value
+  }
+
+  public get starOpened(): boolean {
+    return this._starOpened
+  }
+  public set starOpened(value: boolean) {
+    this._starOpened = value
   }
 }
 

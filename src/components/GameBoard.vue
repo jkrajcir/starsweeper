@@ -172,7 +172,16 @@ function gameBoardClick(mouseEvent: MouseEvent) {
     emits('startGame')
     clickedTileProps.tileStatus = TileStatus.Opened
 
-    if (clickedTileProps.tileType === TileType.Empty) {
+    if (clickedTileProps.tileType === TileType.Star) {
+      // game over
+      emits('endGame')
+      clickedTileProps.starOpened = true
+      for (const tileProps of state.tileCoordinatesToTileProps.values()) {
+        if (tileProps.tileType === TileType.Star) {
+          tileProps.tileStatus = TileStatus.Opened
+        }
+      }
+    } else if (clickedTileProps.tileType === TileType.Empty) {
       const tileCoordinatesToOpenSet: Set<string> = new Set<string>()
 
       getTileCoordinatesToOpen(tileCoordinatesToOpenSet, [clickedTileProps.x, clickedTileProps.y])
@@ -181,14 +190,6 @@ function gameBoardClick(mouseEvent: MouseEvent) {
         const tilePropsToOpen = state.tileCoordinatesToTileProps.get(tileCoordinatesToOpen)
         if (typeof tilePropsToOpen !== 'undefined') {
           tilePropsToOpen.tileStatus = TileStatus.Opened
-        }
-      }
-    } else if (clickedTileProps.tileType === TileType.Star) {
-      // game over
-      emits('endGame')
-      for (const tileProps of state.tileCoordinatesToTileProps.values()) {
-        if (tileProps.tileType === TileType.Star) {
-          tileProps.tileStatus = TileStatus.Opened
         }
       }
     }
