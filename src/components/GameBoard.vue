@@ -141,7 +141,7 @@ function getAdjacentCoordinates(
 }
 
 function getTileCoordinatesFromMouseEvent(mouseEvent: MouseEvent) {
-  const elements = document.elementsFromPoint(mouseEvent.pageX, mouseEvent.pageY)
+  const elements = document.elementsFromPoint(mouseEvent.clientX, mouseEvent.clientY)
   for (const element of elements) {
     const dataset = (element as HTMLElement).dataset
     if (typeof dataset !== 'undefined' && typeof dataset.coordinates !== 'undefined') {
@@ -150,6 +150,13 @@ function getTileCoordinatesFromMouseEvent(mouseEvent: MouseEvent) {
   }
 }
 
+const emits = defineEmits<{
+  (event: 'startGame'): void
+  (event: 'endGame'): void
+  (event: 'plantFlag'): void
+  (event: 'removeFlag'): void
+}>()
+
 function gameBoardClick(mouseEvent: MouseEvent) {
   const tileCoordinates = getTileCoordinatesFromMouseEvent(mouseEvent)
   if (typeof tileCoordinates === 'undefined') {
@@ -157,12 +164,12 @@ function gameBoardClick(mouseEvent: MouseEvent) {
   }
 
   const clickedTileProps = state.tileCoordinatesToTileProps.get(tileCoordinates)
-
   if (typeof clickedTileProps === 'undefined') {
     return
   }
 
   if (clickedTileProps.tileStatus !== TileStatus.Flagged) {
+    emits('startGame')
     clickedTileProps.tileStatus = TileStatus.Opened
 
     if (clickedTileProps.tileType === TileType.Empty) {
@@ -178,6 +185,12 @@ function gameBoardClick(mouseEvent: MouseEvent) {
       }
     } else if (clickedTileProps.tileType === TileType.Star) {
       // game over
+      emits('endGame')
+      for (const tileProps of state.tileCoordinatesToTileProps.values()) {
+        if (tileProps.tileType === TileType.Star) {
+          tileProps.tileStatus = TileStatus.Opened
+        }
+      }
     }
   }
 }
@@ -236,8 +249,10 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
   }
 
   if (clickedTileProps.tileStatus === TileStatus.Unopened) {
+    emits('plantFlag')
     clickedTileProps.tileStatus = TileStatus.Flagged
   } else if (clickedTileProps.tileStatus === TileStatus.Flagged) {
+    emits('removeFlag')
     clickedTileProps.tileStatus = TileStatus.Unopened
   }
 }

@@ -1,24 +1,43 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+<script import lang="ts">
+import { reactive } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import GameBoardHeader from './components/GameBoardHeader.vue'
 </script>
 
-<template>
-  <header>
-    Starsweeper
-    <!--<img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />-->
+<script setup lang="ts">
+const state = reactive({ elapsedTime: 0, flagsRemaining: 10 })
+let gameTimerIntervalId = 0
 
-    <!--<div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>-->
-  </header>
+function startGameTimer() {
+  gameTimerIntervalId = setInterval(() => {
+    state.elapsedTime++
+  }, 1000)
+}
+
+function stopGameTimer() {
+  clearInterval(gameTimerIntervalId)
+}
+
+function plantFlag() {
+  state.flagsRemaining--
+}
+
+function removeFlag() {
+  state.flagsRemaining++
+}
+</script>
+
+<template>
+  <header>Starsweeper</header>
 
   <main>
-    <!--<TheWelcome />-->
-    <GameBoardHeader />
-    <GameBoard />
+    <GameBoardHeader :elapsed-time="state.elapsedTime" :flags-remaining="state.flagsRemaining" />
+    <GameBoard
+      @start-game.once="startGameTimer()"
+      @end-game.once="stopGameTimer()"
+      @plant-flag="plantFlag()"
+      @remove-flag="removeFlag()"
+    />
   </main>
 </template>
 
@@ -35,6 +54,7 @@ main {
   display: flex;
   flex-direction: column;
   row-gap: 3rem;
+  background-color: aquamarine;
 }
 
 /* header {

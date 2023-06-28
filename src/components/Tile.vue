@@ -29,10 +29,9 @@ const starCountToColor = [
   'gray' // 8
 ]
 
-const props = defineProps<{
+const { tileProps } = defineProps<{
   tileProps: TileProperties
 }>()
-const { tileProps } = props
 
 const classObject = computed(() => ({
   opened: tileProps.tileStatus === TileStatus.Opened,

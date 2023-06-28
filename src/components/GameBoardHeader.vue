@@ -1,13 +1,20 @@
+<script setup lang="ts">
+const { elapsedTime, flagsRemaining } = defineProps<{
+  elapsedTime: number
+  flagsRemaining: number
+}>()
+</script>
+
 <template>
   <div class="game-header-container">
     <label>
       Elasped Time
-      <input type="number" readonly value="0" />
+      <input class="game-header-info" type="number" readonly :value="elapsedTime" />
     </label>
-    <button>Start/stop game</button>
+    <button class="restart-button" @click="">Restart game</button>
     <label>
-      Stars remaining
-      <input type="number" readonly value="10" />
+      Flags remaining
+      <input class="game-header-info" type="number" readonly :value="flagsRemaining" />
     </label>
   </div>
 </template>
@@ -17,5 +24,15 @@
   display: flex;
   column-gap: 4rem;
   justify-content: center;
+}
+
+.game-header-info {
+  display: block;
+}
+
+.restart-button {
+  height: fit-content;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 </style>
