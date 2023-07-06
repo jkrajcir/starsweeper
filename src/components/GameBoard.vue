@@ -157,7 +157,13 @@ const emits = defineEmits<{
   (event: 'removeFlag'): void
 }>()
 
+let gameOver: boolean = false
+
 function gameBoardClick(mouseEvent: MouseEvent) {
+  if (gameOver) {
+    return
+  }
+
   const tileCoordinates = getTileCoordinatesFromMouseEvent(mouseEvent)
   if (typeof tileCoordinates === 'undefined') {
     return
@@ -174,11 +180,15 @@ function gameBoardClick(mouseEvent: MouseEvent) {
 
     if (clickedTileProps.tileType === TileType.Star) {
       // game over
+      gameOver = true
       emits('endGame')
       clickedTileProps.starOpened = true
       for (const tileProps of state.tileCoordinatesToTileProps.values()) {
-        if (tileProps.tileType === TileType.Star) {
+        if (tileProps.tileType === TileType.Star && tileProps.tileStatus !== TileStatus.Flagged) {
           tileProps.tileStatus = TileStatus.Opened
+        }
+        if (tileProps.tileStatus === TileStatus.Flagged && tileProps.tileType !== TileType.Star) {
+          tileProps.tileStatus = TileStatus.IncorrectlyFlagged
         }
       }
     } else if (clickedTileProps.tileType === TileType.Empty) {
@@ -197,6 +207,10 @@ function gameBoardClick(mouseEvent: MouseEvent) {
 }
 
 function gameBoardMiddleClick(mousedown: boolean, mouseEvent: MouseEvent) {
+  if (gameOver) {
+    return
+  }
+
   if (mousedown) {
     highlightAdjacentTiles(mouseEvent)
     document.addEventListener('mousemove', highlightAdjacentTiles)
@@ -239,6 +253,10 @@ function highlightAdjacentTiles(mouseEvent: MouseEvent | undefined = undefined) 
 }
 
 function gameBoardRightClick(mouseEvent: MouseEvent) {
+  if (gameOver) {
+    return
+  }
+
   const tileCoordinates = getTileCoordinatesFromMouseEvent(mouseEvent)
   if (typeof tileCoordinates === 'undefined') {
     return

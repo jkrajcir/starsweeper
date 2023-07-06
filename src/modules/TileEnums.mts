@@ -8,7 +8,8 @@ enum TileStatus {
   Unopened,
   Opened,
   Highlighted,
-  Flagged
+  Flagged,
+  IncorrectlyFlagged
 }
 
 export { TileType, TileStatus }
