@@ -61,7 +61,7 @@ for (let x = 0; x < 9; x++) {
   }
 }
 
-const state = reactive({ tileCoordinatesToTileProps })
+const state = reactive({ tileCoordinatesToTileProps, gameOver: false })
 
 function getTileCoordinatesToOpen(
   tileCoordinatesToOpenSet: Set<string>,
@@ -157,10 +157,8 @@ const emits = defineEmits<{
   (event: 'removeFlag'): void
 }>()
 
-let gameOver: boolean = false
-
 function gameBoardClick(mouseEvent: MouseEvent) {
-  if (gameOver) {
+  if (state.gameOver) {
     return
   }
 
@@ -180,7 +178,7 @@ function gameBoardClick(mouseEvent: MouseEvent) {
 
     if (clickedTileProps.tileType === TileType.Star) {
       // game over
-      gameOver = true
+      state.gameOver = true
       emits('endGame')
       clickedTileProps.starOpened = true
       for (const tileProps of state.tileCoordinatesToTileProps.values()) {
@@ -203,11 +201,26 @@ function gameBoardClick(mouseEvent: MouseEvent) {
         }
       }
     }
+
+    // check for winning condition
+    for (const tileProps of state.tileCoordinatesToTileProps.values()) {
+      if (tileProps.tileStatus === TileStatus.Unopened && tileProps.tileType !== TileType.Star) {
+        return
+      }
+    }
+
+    for (const tileProps of state.tileCoordinatesToTileProps.values()) {
+      if (tileProps.tileType === TileType.Star) {
+        tileProps.tileStatus = TileStatus.Flagged
+      }
+    }
+    emits('endGame')
+    state.gameOver = true
   }
 }
 
 function gameBoardMiddleClick(mousedown: boolean, mouseEvent: MouseEvent) {
-  if (gameOver) {
+  if (state.gameOver) {
     return
   }
 
@@ -253,7 +266,7 @@ function highlightAdjacentTiles(mouseEvent: MouseEvent | undefined = undefined) 
 }
 
 function gameBoardRightClick(mouseEvent: MouseEvent) {
-  if (gameOver) {
+  if (state.gameOver) {
     return
   }
 
@@ -290,6 +303,7 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
       v-for="(tileProps, index) of state.tileCoordinatesToTileProps.values()"
       :key="index"
       :tile-props="tileProps"
+      :game-over="state.gameOver"
     />
   </div>
 </template>

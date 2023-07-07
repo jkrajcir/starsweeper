@@ -29,9 +29,11 @@ const starCountToColor = [
   'gray' // 8
 ]
 
-const { tileProps } = defineProps<{
+const props = defineProps<{
   tileProps: TileProperties
+  gameOver: boolean
 }>()
+const { tileProps } = props
 
 const classObject = computed(() => ({
   opened:
@@ -44,7 +46,8 @@ const classObject = computed(() => ({
     tileProps.tileStatus === TileStatus.Highlighted,
   highlighted: tileProps.tileStatus === TileStatus.Highlighted,
   flagged: tileProps.tileStatus === TileStatus.Flagged,
-  'incorrectly-flagged': tileProps.tileStatus === TileStatus.IncorrectlyFlagged
+  'incorrectly-flagged': tileProps.tileStatus === TileStatus.IncorrectlyFlagged,
+  'game-over': props.gameOver && tileProps.tileStatus === TileStatus.Unopened
 }))
 
 const styleObject = computed(() => ({
@@ -105,7 +108,7 @@ const styleObject = computed(() => ({
 .unopened {
   background-color: darkolivegreen;
 
-  &:not(.flagged) {
+  &:not(.flagged, .game-over) {
     &:active,
     &:hover {
       background-color: olivedrab;
