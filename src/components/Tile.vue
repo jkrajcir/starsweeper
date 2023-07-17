@@ -2,9 +2,12 @@
 import type { TileProperties } from '@/modules/TileProperties.mjs'
 import { TileStatus, TileType } from '@/modules/TileEnums.mjs'
 import { computed } from 'vue'
+import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
 <script setup lang="ts">
+const gameStore = useGameStore()
+
 // star count to color
 /**
  * https://i.redd.it/85h4esk1hew41.jpg
@@ -29,11 +32,9 @@ const starCountToColor = [
   'gray' // 8
 ]
 
-const props = defineProps<{
+const { tileProps } = defineProps<{
   tileProps: TileProperties
-  gameOver: boolean
 }>()
-const { tileProps } = props
 
 const classObject = computed(() => ({
   opened:
@@ -47,7 +48,7 @@ const classObject = computed(() => ({
   highlighted: tileProps.tileStatus === TileStatus.Highlighted,
   flagged: tileProps.tileStatus === TileStatus.Flagged,
   'incorrectly-flagged': tileProps.tileStatus === TileStatus.IncorrectlyFlagged,
-  'game-over': props.gameOver && tileProps.tileStatus === TileStatus.Unopened
+  'game-over': gameStore.gameOver && tileProps.tileStatus === TileStatus.Unopened
 }))
 
 const styleObject = computed(() => ({
@@ -143,7 +144,7 @@ const styleObject = computed(() => ({
   font-size: 1.75rem;
   color: red;
   z-index: 100;
-  line-height: 1;
+  line-height: normal;
 }
 
 .opened {

@@ -19,6 +19,13 @@ class TileProperties {
     this._starOpened = false
   }
 
+  public resetProps() {
+    this._tileType = TileType.Empty
+    this._starCount = 0
+    this._tileStatus = TileStatus.Unopened
+    this._starOpened = false
+  }
+
   public get x(): number {
     return this._x
   }
