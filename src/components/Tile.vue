@@ -144,7 +144,7 @@ const styleObject = computed(() => ({
   font-size: 1.75rem;
   color: red;
   z-index: 100;
-  line-height: normal;
+  line-height: 1;
 }
 
 .opened {
