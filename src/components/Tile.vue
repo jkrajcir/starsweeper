@@ -122,7 +122,7 @@ const styleObject = computed(() => ({
   }
 
   &.highlighted {
-    background-color: olivedrab;
+    background-color: tan;
   }
 }
 
