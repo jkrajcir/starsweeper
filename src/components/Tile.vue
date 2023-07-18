@@ -97,6 +97,8 @@ const styleObject = computed(() => ({
 </template>
 
 <style lang="scss">
+@use 'sass:color';
+
 .tile {
   border-radius: 0;
   border-width: 1px;
@@ -110,9 +112,12 @@ const styleObject = computed(() => ({
   background-color: darkolivegreen;
 
   &:not(.flagged, .game-over) {
-    &:active,
     &:hover {
       background-color: olivedrab;
+    }
+
+    &:active {
+      background-color: color.scale($color: olivedrab, $lightness: 15%);
     }
   }
 
