@@ -31,6 +31,7 @@ function toggleFlagging() {
           class="current-game-header-info"
           type="text"
           readonly
+          disabled
           :value="gameStore.elapsedTime"
         />
       </label>
@@ -41,6 +42,7 @@ function toggleFlagging() {
             class="current-game-header-info"
             type="text"
             readonly
+            disabled
             :value="gameStore.flagsRemaining"
           />
         </label>
@@ -98,6 +100,7 @@ function toggleFlagging() {
   background-color: seagreen;
   color: lightyellow;
   cursor: pointer;
+  user-select: none;
   border-radius: 0.2rem;
   border-color: lightcoral;
 }
@@ -121,15 +124,18 @@ function toggleFlagging() {
   display: flex;
   flex-direction: column;
   row-gap: 0.2rem;
+  user-select: none;
 }
 
 .current-game-header-label-text {
   white-space: nowrap;
+  user-select: auto;
 }
 
 .current-game-header-info {
   display: inline-block;
   width: 100%;
+  pointer-events: none;
   border-radius: 0.3rem;
   border-width: 3px;
   border-style: groove;
@@ -157,7 +163,7 @@ function toggleFlagging() {
   padding: 0.3rem;
 
   &:disabled {
-    cursor: auto;
+    cursor: default;
     border-color: color.grayscale($color: lightcoral);
     background-color: color.grayscale($color: seagreen);
     color: color.grayscale($color: lightyellow);
