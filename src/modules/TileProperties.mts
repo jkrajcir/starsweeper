@@ -19,7 +19,7 @@ class TileProperties {
     this._starOpened = false
   }
 
-  public resetProps() {
+  public resetProperties(): void {
     this._tileType = TileType.Empty
     this._starCount = 0
     this._tileStatus = TileStatus.Unopened

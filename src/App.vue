@@ -1,6 +1,7 @@
 <script import lang="ts">
 import GameBoard from '@/components/GameBoard.vue'
 import GameBoardHeader from '@/components/GameBoardHeader.vue'
+import VueDialog from '@/components/VueDialog.vue'
 import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
@@ -29,6 +30,11 @@ gameStore.setupGame()
       <GameBoardHeader />
       <GameBoard />
     </div>
+    <VueDialog
+      @setDialogRef="(element) => (gameStore.gameOverDialog = element)"
+      @closeDialog="gameStore.gameOverDialog?.close()"
+      >{{ gameStore.gameWon ? 'You won the game!' : 'You lost the game!' }}</VueDialog
+    >
   </main>
 </template>
 

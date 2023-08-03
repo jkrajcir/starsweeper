@@ -54,7 +54,10 @@ const useGameStore = defineStore('game', {
     elapsedTime: 0,
     flagsRemaining: 10,
     flagOnly: false,
-    gameOver: false
+    gameOver: false,
+    gameWon: false,
+    settingsDialog: null as HTMLDialogElement | null,
+    gameOverDialog: null as HTMLDialogElement | null
   }),
   getters: {},
   actions: {
@@ -98,7 +101,7 @@ const useGameStore = defineStore('game', {
           if (typeof tileProps === 'undefined') {
             tileProps = new TileProperties(x, y)
           } else {
-            tileProps.resetProps()
+            tileProps.resetProperties()
           }
 
           const tileCoordinates: string = tileProps.coordinates
@@ -123,6 +126,7 @@ const useGameStore = defineStore('game', {
       this.flagOnly = false
       this.flagsRemaining = 10
       this.gameOver = false
+      this.gameWon = false
     },
     openTile(tileCoordinates: string) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
@@ -149,8 +153,6 @@ const useGameStore = defineStore('game', {
           gameTimerIntervalId = 0
         }
 
-        this.gameOver = true
-        clickedTileProps.starOpened = true
         for (const tileProps of tileCoordinatesToTileProps.values()) {
           if (tileProps.tileType === TileType.Star && tileProps.tileStatus !== TileStatus.Flagged) {
             tileProps.tileStatus = TileStatus.Opened
@@ -159,6 +161,10 @@ const useGameStore = defineStore('game', {
             tileProps.tileStatus = TileStatus.IncorrectlyFlagged
           }
         }
+
+        this.gameOver = true
+        this.gameOverDialog?.showModal()
+        clickedTileProps.starOpened = true
 
         return
       }
@@ -203,6 +209,12 @@ const useGameStore = defineStore('game', {
         }
       }
 
+      // player has won the game at this point
+      if (gameTimerIntervalId !== 0) {
+        clearInterval(gameTimerIntervalId)
+        gameTimerIntervalId = 0
+      }
+
       for (const tileProps of this.tileCoordinatesToTileProps.values()) {
         if (tileProps.tileType === TileType.Star && tileProps.tileStatus !== TileStatus.Flagged) {
           this.flagsRemaining--
@@ -210,11 +222,9 @@ const useGameStore = defineStore('game', {
         }
       }
 
-      if (gameTimerIntervalId !== 0) {
-        clearInterval(gameTimerIntervalId)
-        gameTimerIntervalId = 0
-      }
       this.gameOver = true
+      this.gameWon = true
+      this.gameOverDialog?.showModal()
     },
     highlightAdjacentTiles(tileCoordinates: string | undefined = undefined) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
