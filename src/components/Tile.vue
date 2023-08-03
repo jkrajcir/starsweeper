@@ -75,19 +75,29 @@ const styleObject = computed(() => ({
         (tileProps.tileStatus === TileStatus.Opened && tileProps.tileType === TileType.Star)
       "
     >
-      <span v-if="tileProps.tileStatus === TileStatus.IncorrectlyFlagged" class="cross">X</span>
-      <svg viewBox="0 0 24 24" width="24" height="24" class="star">
+      <svg viewBox="0 0 24 24" width="24" height="24" class="tile-icon">
         <path
           d="M12.0008 17L6.12295 20.5902L7.72105 13.8906L2.49023 9.40983L9.35577 8.85942L12.0008 2.5L14.6458 8.85942L21.5114 9.40983L16.2806 13.8906L17.8787 20.5902L12.0008 17Z"
+        ></path>
+      </svg>
+      <svg
+        v-if="tileProps.tileStatus === TileStatus.IncorrectlyFlagged"
+        class="tile-icon cross"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"
         ></path>
       </svg>
     </template>
     <svg
       v-else-if="tileProps.tileStatus === TileStatus.Flagged"
-      class="flag"
       viewBox="0 0 24 24"
       width="24"
       height="24"
+      class="tile-icon"
     >
       <path
         d="M3 3H12.382C12.7607 3 13.107 3.214 13.2764 3.55279L14 5H20C20.5523 5 21 5.44772 21 6V17C21 17.5523 20.5523 18 20 18H13.618C13.2393 18 12.893 17.786 12.7236 17.4472L12 16H5V22H3V3Z"
@@ -130,7 +140,7 @@ const styleObject = computed(() => ({
   position: relative;
 }
 
-.star {
+.tile-icon {
   position: absolute;
   left: 0;
   top: 0;
@@ -139,17 +149,9 @@ const styleObject = computed(() => ({
   margin: auto;
 }
 
-.flag {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .cross {
-  font-size: 1.75rem;
-  color: red;
+  fill: red;
   z-index: 100;
-  line-height: 1;
 }
 
 .opened {
