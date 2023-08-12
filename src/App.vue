@@ -69,7 +69,8 @@ main {
   flex-direction: column;
   row-gap: 1.5rem;
   background-color: lightcoral;
-  width: fit-content;
+  width: 100%;
+  max-width: fit-content;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 2rem;
