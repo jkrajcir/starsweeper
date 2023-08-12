@@ -7,7 +7,6 @@ enum TileType {
 enum TileStatus {
   Unopened,
   Opened,
-  Highlighted,
   Flagged,
   IncorrectlyFlagged
 }

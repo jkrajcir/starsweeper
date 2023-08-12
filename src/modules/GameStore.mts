@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { TileProperties } from '@/modules/TileProperties.mjs'
 import { TileStatus, TileType } from '@/modules/TileEnums.mjs'
+import { GameDifficulty } from '@/modules/GameEnums.mjs'
 
 function getAdjacentCoordinates(
   x: number,
@@ -14,11 +15,14 @@ function getAdjacentCoordinates(
 
   const adjacentCoordinatesArr = new Set<string>()
 
-  if (adjacentX1 <= 8) {
+  if (adjacentX1 < difficultySettings[selectedDifficulty].boardX) {
     if (!visitedCoordinates.has(`${adjacentX1},${y}`)) {
       adjacentCoordinatesArr.add(`${adjacentX1},${y}`)
     }
-    if (adjacentY1 <= 8 && !visitedCoordinates.has(`${adjacentX1},${adjacentY1}`)) {
+    if (
+      adjacentY1 < difficultySettings[selectedDifficulty].boardY &&
+      !visitedCoordinates.has(`${adjacentX1},${adjacentY1}`)
+    ) {
       adjacentCoordinatesArr.add(`${adjacentX1},${adjacentY1}`)
     }
     if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${adjacentX1},${adjacentYn1}`)) {
@@ -29,14 +33,20 @@ function getAdjacentCoordinates(
     if (!visitedCoordinates.has(`${adjacentXn1},${y}`)) {
       adjacentCoordinatesArr.add(`${adjacentXn1},${y}`)
     }
-    if (adjacentY1 <= 8 && !visitedCoordinates.has(`${adjacentXn1},${adjacentY1}`)) {
+    if (
+      adjacentY1 < difficultySettings[selectedDifficulty].boardY &&
+      !visitedCoordinates.has(`${adjacentXn1},${adjacentY1}`)
+    ) {
       adjacentCoordinatesArr.add(`${adjacentXn1},${adjacentY1}`)
     }
     if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${adjacentXn1},${adjacentYn1}`)) {
       adjacentCoordinatesArr.add(`${adjacentXn1},${adjacentYn1}`)
     }
   }
-  if (adjacentY1 <= 8 && !visitedCoordinates.has(`${x},${adjacentY1}`)) {
+  if (
+    adjacentY1 < difficultySettings[selectedDifficulty].boardY &&
+    !visitedCoordinates.has(`${x},${adjacentY1}`)
+  ) {
     adjacentCoordinatesArr.add(`${x},${adjacentY1}`)
   }
   if (adjacentYn1 >= 0 && !visitedCoordinates.has(`${x},${adjacentYn1}`)) {
@@ -47,12 +57,21 @@ function getAdjacentCoordinates(
 }
 
 let gameTimerIntervalId = 0
+let randomKey = Math.random()
+
+let selectedDifficulty = GameDifficulty.Easy
+const difficultySettings: { boardX: number; boardY: number; totalStars: number }[] = []
+difficultySettings[GameDifficulty.Easy] = { boardX: 9, boardY: 9, totalStars: 10 }
+difficultySettings[GameDifficulty.Normal] = { boardX: 16, boardY: 16, totalStars: 40 }
+difficultySettings[GameDifficulty.Hard] = { boardX: 30, boardY: 16, totalStars: 99 }
 
 const useGameStore = defineStore('game', {
   state: () => ({
     tileCoordinatesToTileProps: new Map<string, TileProperties>(),
     elapsedTime: 0,
-    flagsRemaining: 10,
+    flagsRemaining: difficultySettings[selectedDifficulty].totalStars,
+    boardX: difficultySettings[selectedDifficulty].boardX,
+    boardY: difficultySettings[selectedDifficulty].boardY,
     flagOnly: false,
     gameOver: false,
     gameWon: false,
@@ -61,19 +80,30 @@ const useGameStore = defineStore('game', {
   }),
   getters: {},
   actions: {
-    setupGame() {
+    setupGame(gameDifficulty?: GameDifficulty) {
       if (gameTimerIntervalId !== 0) {
         clearInterval(gameTimerIntervalId)
         gameTimerIntervalId = 0
       }
-      const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
+
+      if (typeof gameDifficulty === 'undefined') {
+        gameDifficulty = selectedDifficulty
+      } else {
+        selectedDifficulty = gameDifficulty
+        randomKey = Math.random()
+        this.tileCoordinatesToTileProps.clear()
+      }
+
+      this.boardX = difficultySettings[selectedDifficulty].boardX
+      this.boardY = difficultySettings[selectedDifficulty].boardY
+      const totalStars = difficultySettings[selectedDifficulty].totalStars
 
       const starCoordinatesSet: Set<string> = new Set<string>()
       do {
-        const starX = Math.floor(Math.random() * 9)
-        const starY = Math.floor(Math.random() * 9)
+        const starX = Math.floor(Math.random() * this.boardX)
+        const starY = Math.floor(Math.random() * this.boardY)
         starCoordinatesSet.add(`${starX},${starY}`)
-      } while (starCoordinatesSet.size < 10)
+      } while (starCoordinatesSet.size < totalStars)
 
       const coordinatesToStarCount: Map<string, number> = new Map<string, number>()
       for (const starCoordinates of starCoordinatesSet) {
@@ -95,15 +125,14 @@ const useGameStore = defineStore('game', {
         }
       }
 
-      for (let x = 0; x < 9; x++) {
-        for (let y = 0; y < 9; y++) {
-          let tileProps = tileCoordinatesToTileProps.get(`${x},${y}`)
+      for (let y = 0; y < this.boardY; y++) {
+        for (let x = 0; x < this.boardX; x++) {
+          let tileProps = this.tileCoordinatesToTileProps.get(`${x},${y}`)
           if (typeof tileProps === 'undefined') {
-            tileProps = new TileProperties(x, y)
+            tileProps = new TileProperties(x, y, randomKey)
           } else {
             tileProps.resetProperties()
           }
-
           const tileCoordinates: string = tileProps.coordinates
           if (starCoordinatesSet.has(tileCoordinates)) {
             tileProps.tileType = TileType.Star
@@ -116,17 +145,19 @@ const useGameStore = defineStore('game', {
             }
           }
 
-          if (!tileCoordinatesToTileProps.has(`${x},${y}`)) {
-            tileCoordinatesToTileProps.set(tileCoordinates, tileProps)
+          if (!this.tileCoordinatesToTileProps.has(`${x},${y}`)) {
+            this.tileCoordinatesToTileProps.set(tileCoordinates, tileProps)
           }
         }
       }
 
       this.elapsedTime = 0
       this.flagOnly = false
-      this.flagsRemaining = 10
+      this.flagsRemaining = totalStars
       this.gameOver = false
       this.gameWon = false
+      this.gameOverDialog?.close()
+      this.settingsDialog?.close()
     },
     openTile(tileCoordinates: string) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
@@ -229,8 +260,8 @@ const useGameStore = defineStore('game', {
     highlightAdjacentTiles(tileCoordinates: string | undefined = undefined) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
       for (const tileProps of tileCoordinatesToTileProps.values()) {
-        if (tileProps.tileStatus === TileStatus.Highlighted) {
-          tileProps.tileStatus = TileStatus.Unopened
+        if (tileProps.highlighted) {
+          tileProps.highlighted = false
         }
       }
 
@@ -245,11 +276,8 @@ const useGameStore = defineStore('game', {
 
       for (const tileToHighlightCoordinate of tilesToHighlightCoordinates) {
         const tileToHighlightProps = tileCoordinatesToTileProps.get(tileToHighlightCoordinate)
-        if (
-          typeof tileToHighlightProps !== 'undefined' &&
-          tileToHighlightProps.tileStatus === TileStatus.Unopened
-        ) {
-          tileToHighlightProps.tileStatus = TileStatus.Highlighted
+        if (typeof tileToHighlightProps !== 'undefined' && !tileToHighlightProps.highlighted) {
+          tileToHighlightProps.highlighted = true
         }
       }
     },
