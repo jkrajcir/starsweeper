@@ -1,22 +1,26 @@
-import { TileType, TileStatus } from './TileEnums.mjs'
+import { TileType, TileStatus } from '@/modules/TileEnums.mjs'
 
 class TileProperties {
   private _x: number
   private _y: number
   private _coordinates: string
+  private _id: string
   private _tileType: TileType
   private _starCount: number
   private _tileStatus: TileStatus
   private _starOpened: boolean
+  private _highlighted: boolean
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, randomKey: number) {
     this._x = x
     this._y = y
     this._coordinates = `${this._x},${this._y}`
+    this._id = this._coordinates + randomKey
     this._tileType = TileType.Empty
     this._starCount = 0
     this._tileStatus = TileStatus.Unopened
     this._starOpened = false
+    this._highlighted = false
   }
 
   public resetProperties(): void {
@@ -36,6 +40,10 @@ class TileProperties {
 
   public get coordinates(): string {
     return this._coordinates
+  }
+
+  public get id(): string {
+    return this._id
   }
 
   public get tileType(): TileType {
@@ -64,6 +72,13 @@ class TileProperties {
   }
   public set starOpened(value: boolean) {
     this._starOpened = value
+  }
+
+  public get highlighted(): boolean {
+    return this._highlighted
+  }
+  public set highlighted(value: boolean) {
+    this._highlighted = value
   }
 }
 

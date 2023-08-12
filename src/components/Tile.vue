@@ -42,10 +42,8 @@ const classObject = computed(() => ({
     tileProps.tileStatus === TileStatus.IncorrectlyFlagged,
   'star-opened': tileProps.starOpened,
   unopened:
-    tileProps.tileStatus === TileStatus.Unopened ||
-    tileProps.tileStatus === TileStatus.Flagged ||
-    tileProps.tileStatus === TileStatus.Highlighted,
-  highlighted: tileProps.tileStatus === TileStatus.Highlighted,
+    tileProps.tileStatus === TileStatus.Unopened || tileProps.tileStatus === TileStatus.Flagged,
+  highlighted: tileProps.highlighted,
   flagged: tileProps.tileStatus === TileStatus.Flagged,
   'incorrectly-flagged': tileProps.tileStatus === TileStatus.IncorrectlyFlagged,
   'game-over': gameStore.gameOver && tileProps.tileStatus === TileStatus.Unopened
@@ -133,6 +131,10 @@ const styleObject = computed(() => ({
 
   &.highlighted {
     background-color: tan;
+
+    &.flagged {
+      background-color: olivedrab;
+    }
   }
 }
 

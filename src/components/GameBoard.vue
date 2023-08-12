@@ -85,7 +85,7 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
   >
     <Tile
       v-for="tileProps of gameStore.tileCoordinatesToTileProps.values()"
-      :key="tileProps.coordinates"
+      :key="tileProps.id"
       :tile-props="tileProps"
     />
   </div>
@@ -94,9 +94,10 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
 <style>
 .game-board {
   display: grid;
-  grid-template-columns: repeat(9, 35px);
-  grid-template-rows: repeat(9, 35px);
-  width: fit-content;
+  grid-template-columns: repeat(v-bind('gameStore.boardX'), 35px);
+  grid-template-rows: repeat(v-bind('gameStore.boardY'), 35px);
+  width: 100%;
+  overflow-x: auto;
   margin: 0 auto;
   border-width: 3px;
   border-style: inset;
