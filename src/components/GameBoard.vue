@@ -83,6 +83,7 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
     @click.right.prevent="gameBoardRightClick($event)"
     class="game-board"
   >
+    <h1 class="visually-hidden">Game board</h1>
     <Tile
       v-for="tileProps of gameStore.tileCoordinatesToTileProps.values()"
       :key="tileProps.id"
