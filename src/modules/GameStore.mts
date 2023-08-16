@@ -6,7 +6,8 @@ import { GameDifficulty } from '@/modules/GameEnums.mjs'
 function getAdjacentCoordinates(
   x: number,
   y: number,
-  visitedCoordinates: Set<string>
+  visitedCoordinates: Set<string>,
+  selectedDifficulty: GameDifficulty
 ): Set<string> {
   const adjacentX1: number = x + 1
   const adjacentXn1: number = x - 1
@@ -59,7 +60,6 @@ function getAdjacentCoordinates(
 let gameTimerIntervalId = 0
 let randomKey = Math.random()
 
-let selectedDifficulty = GameDifficulty.Easy
 const difficultySettings: { boardX: number; boardY: number; totalStars: number }[] = []
 difficultySettings[GameDifficulty.Easy] = { boardX: 9, boardY: 9, totalStars: 10 }
 difficultySettings[GameDifficulty.Normal] = { boardX: 16, boardY: 16, totalStars: 40 }
@@ -69,16 +69,18 @@ const useGameStore = defineStore('game', {
   state: () => ({
     tileCoordinatesToTileProps: new Map<string, TileProperties>(),
     elapsedTime: 0,
-    flagsRemaining: difficultySettings[selectedDifficulty].totalStars,
-    boardX: difficultySettings[selectedDifficulty].boardX,
-    boardY: difficultySettings[selectedDifficulty].boardY,
+    selectedDifficulty: GameDifficulty.Easy,
+    flagsRemaining: difficultySettings[GameDifficulty.Easy].totalStars,
     flagOnly: false,
     gameOver: false,
     gameWon: false,
     settingsDialog: null as HTMLDialogElement | null,
     gameOverDialog: null as HTMLDialogElement | null
   }),
-  getters: {},
+  getters: {
+    boardX: (state) => difficultySettings[state.selectedDifficulty].boardX,
+    boardY: (state) => difficultySettings[state.selectedDifficulty].boardY
+  },
   actions: {
     setupGame(gameDifficulty?: GameDifficulty) {
       if (gameTimerIntervalId !== 0) {
@@ -87,16 +89,14 @@ const useGameStore = defineStore('game', {
       }
 
       if (typeof gameDifficulty === 'undefined') {
-        gameDifficulty = selectedDifficulty
+        gameDifficulty = this.selectedDifficulty
       } else {
-        selectedDifficulty = gameDifficulty
+        this.selectedDifficulty = gameDifficulty
         randomKey = Math.random()
         this.tileCoordinatesToTileProps.clear()
       }
 
-      this.boardX = difficultySettings[selectedDifficulty].boardX
-      this.boardY = difficultySettings[selectedDifficulty].boardY
-      const totalStars = difficultySettings[selectedDifficulty].totalStars
+      const totalStars = difficultySettings[this.selectedDifficulty].totalStars
 
       const starCoordinatesSet: Set<string> = new Set<string>()
       do {
@@ -111,7 +111,12 @@ const useGameStore = defineStore('game', {
         const starX: number = Number.parseInt(starCoordinatesArr[0])
         const starY: number = Number.parseInt(starCoordinatesArr[1])
 
-        const adjacentCoordinates = getAdjacentCoordinates(starX, starY, starCoordinatesSet)
+        const adjacentCoordinates = getAdjacentCoordinates(
+          starX,
+          starY,
+          starCoordinatesSet,
+          this.selectedDifficulty
+        )
 
         for (const adjacentCoordinate of adjacentCoordinates) {
           const adjacentCoordinatesArr = adjacentCoordinate.split(',')
@@ -209,7 +214,8 @@ const useGameStore = defineStore('game', {
           const adjacentTileToOpenCoordinates = getAdjacentCoordinates(
             Number.parseInt(tileCoordinateToVisit.split(',')[0]),
             Number.parseInt(tileCoordinateToVisit.split(',')[1]),
-            tileCoordinatesToOpen
+            tileCoordinatesToOpen,
+            this.selectedDifficulty
           )
 
           for (const tileToOpenCoordinates of adjacentTileToOpenCoordinates) {
@@ -272,7 +278,12 @@ const useGameStore = defineStore('game', {
       const tileCoordinatesArr = tileCoordinates.split(',')
       const tileX = Number.parseInt(tileCoordinatesArr[0])
       const tileY = Number.parseInt(tileCoordinatesArr[1])
-      const tilesToHighlightCoordinates = getAdjacentCoordinates(tileX, tileY, new Set<string>())
+      const tilesToHighlightCoordinates = getAdjacentCoordinates(
+        tileX,
+        tileY,
+        new Set<string>(),
+        this.selectedDifficulty
+      )
 
       for (const tileToHighlightCoordinate of tilesToHighlightCoordinates) {
         const tileToHighlightProps = tileCoordinatesToTileProps.get(tileToHighlightCoordinate)
