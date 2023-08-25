@@ -1,22 +1,32 @@
 <script lang="ts" setup>
 const emits = defineEmits<{
   (e: 'setDialogRef', dialogElement: HTMLDialogElement): void
-  (e: 'closeDialog'): void
+  (e: 'closeButton'): void
+  (e: 'dialogClosed', event: Event): void
 }>()
 
 function setDialogRef(dialogElement: HTMLDialogElement) {
   emits('setDialogRef', dialogElement)
 }
 
-function closeDialog() {
-  emits('closeDialog')
+function closeButton() {
+  emits('closeButton')
+}
+
+function dialogClosed(event: Event) {
+  emits('dialogClosed', event)
 }
 </script>
 
 <template>
-  <dialog :ref="(dialogElement) => setDialogRef(dialogElement as HTMLDialogElement)">
+  <dialog
+    @close="dialogClosed($event)"
+    :ref="(dialogElement) => setDialogRef(dialogElement as HTMLDialogElement)"
+  >
     <slot></slot>
-    <button class="dialog-close-button" @click="closeDialog()">Close</button>
+    <slot name="close">
+      <button class="btn btn-lightcoral" @click="closeButton()">Close</button>
+    </slot>
   </dialog>
 </template>
 
@@ -39,19 +49,5 @@ dialog {
   &::backdrop {
     background-color: color.scale($color: slategray, $lightness: 20%, $alpha: -40%);
   }
-}
-
-.dialog-close-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: fit-content;
-  padding: 0.3rem;
-  background-color: lightcoral;
-  color: lightyellow;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 0.2rem;
-  border-color: lightcoral;
 }
 </style>

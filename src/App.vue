@@ -3,11 +3,40 @@ import GameBoard from '@/components/GameBoard.vue'
 import GameBoardHeader from '@/components/GameBoardHeader.vue'
 import VueDialog from '@/components/VueDialog.vue'
 import { useGameStore } from '@/modules/GameStore.mjs'
+import Scoreboard from '@/components/Scoreboard.vue'
+import { ref } from 'vue'
 </script>
 
 <script setup lang="ts">
 const gameStore = useGameStore()
 gameStore.setupGame()
+let playerName: string | undefined = undefined
+const nameInputElement = ref<HTMLInputElement | null>(null)
+
+async function closeDialog(saveTopTime: boolean = false) {
+  if (saveTopTime && nameInputElement.value) {
+    if (!playerName) {
+      nameInputElement.value.setCustomValidity('Name required to save new top time.')
+      nameInputElement.value.reportValidity()
+      return
+    } else if (playerName.length > 20) {
+      nameInputElement.value.maxLength = 20
+      nameInputElement.value.setCustomValidity('Name must be 20 characters or lower.')
+      nameInputElement.value.reportValidity()
+      return
+    }
+
+    const errorMessage = await gameStore.saveNewTopTime(playerName)
+    if (errorMessage) {
+      alert(errorMessage)
+    } else {
+      playerName = undefined
+      gameStore.gameOverDialog?.close()
+    }
+  } else {
+    gameStore.gameOverDialog?.close()
+  }
+}
 </script>
 
 <template>
@@ -29,16 +58,47 @@ gameStore.setupGame()
     <div class="game">
       <GameBoardHeader />
       <GameBoard />
+      <VueDialog
+        @setDialogRef="(element) => (gameStore.gameOverDialog = element)"
+        @closeButton="gameStore.gameOverDialog?.close()"
+      >
+        <div class="gameover-dialog-result">
+          {{
+            gameStore.gameWon
+              ? `You won the game in ${gameStore.elapsedTime} seconds!`
+              : 'You lost the game!'
+          }}
+        </div>
+
+        <template v-if="gameStore.gameWon">
+          <div class="dialog-msg">
+            <p>You also placed into a top time!</p>
+            <p>Enter a name below for your winning time:</p>
+          </div>
+          <label class="name-label">
+            Name
+            <input
+              ref="nameInputElement"
+              class="name-input"
+              maxlength="20"
+              type="text"
+              v-model="playerName"
+            />
+          </label>
+        </template>
+        <template v-if="gameStore.gameWon" #close>
+          <button class="btn btn-seagreen" @click="closeDialog(true)">Save</button>
+          <button class="btn btn-lightcoral" @click="closeDialog()">Cancel</button>
+        </template>
+      </VueDialog>
     </div>
-    <VueDialog
-      @setDialogRef="(element) => (gameStore.gameOverDialog = element)"
-      @closeDialog="gameStore.gameOverDialog?.close()"
-      >{{ gameStore.gameWon ? 'You won the game!' : 'You lost the game!' }}</VueDialog
-    >
+    <Scoreboard />
   </main>
+
+  <footer>TODO footer content</footer>
 </template>
 
-<style>
+<style lang="scss">
 header {
   padding: 2.5rem 0;
   display: flex;
@@ -49,6 +109,16 @@ header {
 
 main {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5rem;
+  margin-bottom: 2rem;
+}
+
+footer {
+  border-top-width: 2px;
+  border-top-style: solid;
+  padding: 1.75rem;
 }
 
 .title {
@@ -64,6 +134,18 @@ main {
   fill: gold;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .game {
   display: flex;
   flex-direction: column;
@@ -73,8 +155,53 @@ main {
   max-width: fit-content;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 2rem;
   padding: 1.75rem;
+  border-radius: 0.3rem;
+}
+
+.dialog-msg {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: fit-content;
+  padding: 0.3rem;
+  color: lightyellow;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 0.2rem;
+  border-color: lightcoral;
+  &.btn-lightcoral {
+    background-color: lightcoral;
+  }
+  &.btn-seagreen {
+    background-color: seagreen;
+  }
+  &.btn-icon {
+    column-gap: 0.3rem;
+  }
+}
+
+.gameover-dialog-result {
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.name-label {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.2rem;
+  width: 13rem;
+  font-weight: bold;
+}
+
+.name-input {
   border-radius: 0.3rem;
 }
 </style>
