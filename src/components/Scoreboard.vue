@@ -1,4 +1,5 @@
 <script import lang="ts">
+import { GameDifficulty } from '@/modules/GameEnums.mjs'
 import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
@@ -13,9 +14,11 @@ const gameStore = useGameStore()
       <label>
         Difficulty:
         <select v-model="gameStore.selectedDifficulty">
-          <option value="0">Easy</option>
-          <option value="1">Normal</option>
-          <option value="2">Hard</option>
+          <option :value="GameDifficulty.Easy">{{ GameDifficulty[GameDifficulty.Easy] }}</option>
+          <option :value="GameDifficulty.Normal">
+            {{ GameDifficulty[GameDifficulty.Normal] }}
+          </option>
+          <option :value="GameDifficulty.Hard">{{ GameDifficulty[GameDifficulty.Hard] }}</option>
         </select>
       </label>
       <span>Personal best: 25</span>
