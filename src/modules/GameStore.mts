@@ -58,6 +58,7 @@ function getAdjacentCoordinates(
 
 let gameTimerIntervalId = 0
 let randomKey = Math.random()
+let timestampWon: string | undefined = undefined
 
 let selectedDifficulty = GameDifficulty.Easy
 const difficultySettings: { boardX: number; boardY: number; totalStars: number }[] = []
@@ -249,6 +250,8 @@ const useGameStore = defineStore('game', {
         gameTimerIntervalId = 0
       }
 
+      timestampWon = new Date().toISOString()
+
       for (const tileProps of this.tileCoordinatesToTileProps.values()) {
         if (tileProps.tileType === TileType.Star && tileProps.tileStatus !== TileStatus.Flagged) {
           this.flagsRemaining--
@@ -259,6 +262,54 @@ const useGameStore = defineStore('game', {
       this.gameOver = true
       this.gameWon = true
       this.gameOverDialog?.showModal()
+    },
+    async saveNewTopTime(playerName: string): Promise<string | undefined> {
+      const params = {
+        elapsedTime: this.elapsedTime,
+        difficulty: this.selectedDifficulty,
+        playerName: playerName,
+        timestamp: timestampWon
+      }
+
+      const request = new Request(import.meta.env.VITE_FUNCTIONS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify(params)
+      })
+
+      try {
+        const response = await fetch(request)
+        let errorMessage: string = ''
+
+        if (response.ok) {
+          timestampWon = undefined
+          return
+        } else if (response.status === 400) {
+          const responseJson: { invalidParams: string[] } = await response.json()
+          const { invalidParams } = responseJson
+          if (typeof invalidParams !== 'undefined') {
+            errorMessage = `HTTP Status: ${
+              response.status
+            }, Invalid parameters were sent: ${invalidParams.join(', ')}`
+          } else {
+            errorMessage = `HTTP Status: ${response.status}`
+          }
+        } else if (response.status === 405) {
+          const allowedHttpMethods = response.headers.get('Allow')
+          errorMessage = `HTTP Status: ${response.status}, Allowed Methods: ${allowedHttpMethods}`
+        } else {
+          errorMessage = `HTTP Status: ${response.status}`
+        }
+
+        console.error(errorMessage)
+      } catch (error) {
+        console.error('Error while trying to save new top time:', error)
+      }
+
+      return 'Error while trying to save new top time. Please try again.'
     },
     highlightAdjacentTiles(tileCoordinates: string | undefined = undefined) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
