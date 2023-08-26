@@ -1,0 +1,10 @@
+-- Role: write_starsweeper
+-- DROP ROLE IF EXISTS write_starsweeper;
+
+CREATE ROLE write_starsweeper WITH
+  NOLOGIN
+  NOSUPERUSER
+  NOINHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION;
