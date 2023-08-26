@@ -1,0 +1,18 @@
+-- SCHEMA: game
+
+-- DROP SCHEMA IF EXISTS game ;
+
+CREATE SCHEMA IF NOT EXISTS game
+    AUTHORIZATION doadmin;
+
+GRANT ALL ON SCHEMA game TO doadmin;
+
+GRANT USAGE ON SCHEMA game TO read_starsweeper;
+
+GRANT USAGE ON SCHEMA game TO write_starsweeper;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE doadmin IN SCHEMA game
+GRANT SELECT ON TABLES TO read_starsweeper;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE doadmin IN SCHEMA game
+GRANT INSERT ON TABLES TO write_starsweeper;
