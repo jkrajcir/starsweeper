@@ -1,0 +1,14 @@
+{
+  "main": "lib/save-new-top-time.mjs",
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^4",
+    "@types/pg": "^8.10.2"
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
