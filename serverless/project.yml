@@ -1,0 +1,27 @@
+parameters: {}
+environment: {}
+packages:
+  - name: starsweeper
+    shared: false
+    environment:
+      DB_USER: '${DB_USER}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      DB_HOST: '${DB_HOST}'
+      DB_PORT: '${DB_PORT}'
+      DB_NAME: '${DB_NAME}'
+      DB_CA: '${DB_CA}'
+    parameters: {}
+    annotations: {}
+    functions:
+      - name: save-new-top-time
+        binary: false
+        main: ''
+        runtime: nodejs:18
+        web: true
+        webSecure: false
+        parameters: {}
+        environment: {}
+        annotations: {}
+        limits:
+          timeout: 300
+          memory: 256
