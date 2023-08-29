@@ -9,7 +9,7 @@ export async function main(
     elapsedTime: number | string
     difficulty: number | string
     playerName: string
-    timestamp: string
+    dateWon: string
   },
   context: {}
 ): Promise<{}> {
@@ -22,7 +22,7 @@ export async function main(
   }
 
   const invalidParams: string[] = []
-  let { elapsedTime, difficulty, playerName, timestamp } = event
+  let { elapsedTime, difficulty, playerName, dateWon } = event
   elapsedTime = Number.parseInt(elapsedTime as string)
   difficulty = Number.parseInt(difficulty as string)
 
@@ -35,14 +35,16 @@ export async function main(
   if (typeof playerName !== 'string' || playerName.length > 20 || playerName.length === 0) {
     invalidParams.push('playerName')
   }
-  const functionStartTimeStamp = 1692311431
-  const timestampTime = new Date(timestamp).getTime()
+  const starsweeperOnlineDate = new Date('2023-08-29').getTime()
+  const currentDateIsoString = new Date().toISOString().split('T')[0]
+  const currentDateTime = new Date(currentDateIsoString).getTime()
+  const dateWonTime = new Date(dateWon).getTime()
   if (
-    Number.isNaN(timestampTime) ||
-    timestampTime < functionStartTimeStamp ||
-    timestampTime > Date.now()
+    Number.isNaN(dateWonTime) ||
+    dateWonTime < starsweeperOnlineDate ||
+    dateWonTime > currentDateTime
   ) {
-    invalidParams.push('timestamp')
+    invalidParams.push('dateWon')
   }
 
   if (invalidParams.length > 0) {
@@ -68,13 +70,13 @@ export async function main(
     console.log('Connected to Postgres DB')
 
     const queryConfig: QueryConfig = {
-      text: 'INSERT INTO game.top_times(player_name, difficulty, elapsed_time, game_won_timestamp) VALUES ($1, $2, $3, $4)',
-      values: [playerName, difficulty, elapsedTime, timestamp]
+      text: 'INSERT INTO game.top_times(player_name, difficulty, elapsed_time, game_won_date) VALUES ($1, $2, $3, $4)',
+      values: [playerName, difficulty, elapsedTime, dateWon]
     }
 
     console.log('Sending INSERT')
-    const res = await client.query(queryConfig)
-    console.log('Rows affected: ' + res.rowCount)
+    const queryResult = await client.query(queryConfig)
+    console.log('Rows affected: ' + queryResult.rowCount)
   } catch (err) {
     console.error(err)
     await client.end()
