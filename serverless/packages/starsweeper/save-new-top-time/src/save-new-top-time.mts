@@ -9,7 +9,7 @@ export async function main(
     elapsedTime: number | string
     difficulty: number | string
     playerName: string
-    dateWon: string
+    timestamp: string
   },
   context: {}
 ): Promise<{}> {
@@ -22,7 +22,7 @@ export async function main(
   }
 
   const invalidParams: string[] = []
-  let { elapsedTime, difficulty, playerName, dateWon } = event
+  let { elapsedTime, difficulty, playerName, timestamp } = event
   elapsedTime = Number.parseInt(elapsedTime as string)
   difficulty = Number.parseInt(difficulty as string)
 
@@ -38,13 +38,13 @@ export async function main(
   const starsweeperOnlineDate = new Date('2023-08-29').getTime()
   const currentDateIsoString = new Date().toISOString().split('T')[0]
   const currentDateTime = new Date(currentDateIsoString).getTime()
-  const dateWonTime = new Date(dateWon).getTime()
+  const timestampTime = new Date(timestamp).getTime()
   if (
-    Number.isNaN(dateWonTime) ||
-    dateWonTime < starsweeperOnlineDate ||
-    dateWonTime > currentDateTime
+    Number.isNaN(timestampTime) ||
+    timestampTime < starsweeperOnlineDate ||
+    timestampTime > currentDateTime
   ) {
-    invalidParams.push('dateWon')
+    invalidParams.push('timestamp')
   }
 
   if (invalidParams.length > 0) {
@@ -70,8 +70,11 @@ export async function main(
     console.log('Connected to Postgres DB')
 
     const queryConfig: QueryConfig = {
-      text: 'INSERT INTO game.top_times(player_name, difficulty, elapsed_time, game_won_date) VALUES ($1, $2, $3, $4)',
-      values: [playerName, difficulty, elapsedTime, dateWon]
+      text: `
+        INSERT INTO game.top_times(player_name, difficulty, elapsed_time, game_won_timestamp)
+        VALUES ($1, $2, $3, $4)
+      `,
+      values: [playerName, difficulty, elapsedTime, timestamp]
     }
 
     console.log('Sending INSERT')
