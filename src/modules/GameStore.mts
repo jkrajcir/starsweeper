@@ -58,7 +58,7 @@ function getAdjacentCoordinates(
 
 let gameTimerIntervalId = 0
 let randomKey = Math.random()
-let dateWon: string | undefined = undefined
+let timestampWon: string | undefined = undefined
 
 let selectedDifficulty = GameDifficulty.Easy
 const difficultySettings: { boardX: number; boardY: number; totalStars: number }[] = []
@@ -250,7 +250,7 @@ const useGameStore = defineStore('game', {
         gameTimerIntervalId = 0
       }
 
-      dateWon = new Date().toISOString().split('T')[0]
+      timestampWon = new Date().toISOString()
 
       for (const tileProps of this.tileCoordinatesToTileProps.values()) {
         if (tileProps.tileType === TileType.Star && tileProps.tileStatus !== TileStatus.Flagged) {
@@ -268,7 +268,7 @@ const useGameStore = defineStore('game', {
         elapsedTime: this.elapsedTime,
         difficulty: this.selectedDifficulty,
         playerName: playerName,
-        dateWon: dateWon
+        timestamp: timestampWon
       }
 
       const request = new Request(import.meta.env.VITE_FUNCTIONS_URL, {
@@ -285,7 +285,7 @@ const useGameStore = defineStore('game', {
         let errorMessage: string = ''
 
         if (response.ok) {
-          dateWon = undefined
+          timestampWon = undefined
           return
         } else if (response.status === 400) {
           const responseJson: { invalidParams: string[] } = await response.json()
