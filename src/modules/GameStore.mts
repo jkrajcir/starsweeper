@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { TileProperties } from '@/modules/TileProperties.mjs'
 import { TileStatus, TileType } from '@/modules/TileEnums.mjs'
-import { GameDifficulty } from '@/modules/GameEnums.mjs'
+import { DateRange, GameDifficulty, ensureLeaderboardEntriesResponseDto } from '@common'
 
 function getAdjacentCoordinates(
   x: number,

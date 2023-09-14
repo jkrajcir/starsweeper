@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "composite": true, "module": "Node16", "rootDir": "src", "outDir": "dist" },
+  "include": ["src/**/*"]
+}
