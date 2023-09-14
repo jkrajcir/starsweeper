@@ -1,5 +1,5 @@
 <script import lang="ts">
-import { GameDifficulty } from '@/modules/GameEnums.mjs'
+import { GameDifficulty } from '@common'
 import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
@@ -8,9 +8,9 @@ const gameStore = useGameStore()
 </script>
 
 <template>
-  <div class="scoreboard">
-    <h1 class="visually-hidden">Scoreboard</h1>
-    <div class="scoreboard-header difficulty-pb">
+  <div class="leaderboard">
+    <h1 class="visually-hidden">Leaderboard</h1>
+    <div class="leaderboard-header difficulty-pb">
       <label>
         Difficulty:
         <select v-model="gameStore.selectedDifficulty">
@@ -23,7 +23,7 @@ const gameStore = useGameStore()
       </label>
       <span>Personal best: 25</span>
     </div>
-    <h2 class="scoreboard-header">Top 10 times for:</h2>
+    <h2 class="leaderboard-header">Top 10 times for:</h2>
     <div class="top-times">
       <div class="top-times-card">
         <h3>Today</h3>
@@ -52,7 +52,7 @@ const gameStore = useGameStore()
 </template>
 
 <style lang="scss">
-.scoreboard {
+.leaderboard {
   background-color: lightcoral;
   margin: 0 2rem;
   padding: 1.75rem;
@@ -62,7 +62,7 @@ const gameStore = useGameStore()
   flex-direction: column;
 }
 
-.scoreboard-header {
+.leaderboard-header {
   font-size: 1.5rem;
   width: fit-content;
 }
