@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "importHelpers": true,
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "target": "es2021",
+    "paths": {
+      "@common": ["../common"]
+    }
+  }
+}

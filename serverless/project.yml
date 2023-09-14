@@ -25,3 +25,15 @@ packages:
         limits:
           timeout: 300
           memory: 256
+      - name: get-leaderboard-entries
+        binary: false
+        main: ''
+        runtime: nodejs:18
+        web: true
+        webSecure: false
+        parameters: {}
+        environment: {}
+        annotations: {}
+        limits:
+          timeout: 300
+          memory: 256
