@@ -3,13 +3,14 @@ import GameBoard from '@/components/GameBoard.vue'
 import GameBoardHeader from '@/components/GameBoardHeader.vue'
 import VueDialog from '@/components/VueDialog.vue'
 import { useGameStore } from '@/modules/GameStore.mjs'
-import Scoreboard from '@/components/Scoreboard.vue'
+import Leaderboard from '@/components/Leaderboard.vue'
 import { ref } from 'vue'
 </script>
 
 <script setup lang="ts">
 const gameStore = useGameStore()
 gameStore.setupGame()
+gameStore.getLeaderboardEntries()
 let playerName: string | undefined = undefined
 const nameInputElement = ref<HTMLInputElement | null>(null)
 
@@ -92,7 +93,7 @@ async function closeDialog(saveTopTime: boolean = false) {
         </template>
       </VueDialog>
     </div>
-    <Scoreboard />
+    <Leaderboard />
   </main>
 
   <footer>TODO footer content</footer>
