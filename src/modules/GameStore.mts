@@ -228,6 +228,9 @@ const useGameStore = defineStore('game', {
         for (const tileCoordinateToOpen of tileCoordinatesToOpen) {
           const tilePropsToOpen = tileCoordinatesToTileProps.get(tileCoordinateToOpen)
           if (typeof tilePropsToOpen !== 'undefined') {
+            if (tilePropsToOpen.tileStatus === TileStatus.Flagged) {
+              this.flagsRemaining++
+            }
             tilePropsToOpen.tileStatus = TileStatus.Opened
           }
         }
