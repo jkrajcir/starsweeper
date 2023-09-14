@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { TileProperties } from '@/modules/TileProperties.mjs'
 import { TileStatus, TileType } from '@/modules/TileEnums.mjs'
 import { DateRange, GameDifficulty, ensureLeaderboardEntriesResponseDto } from '@common'
+import type {
+  NewTopTimeParamsRequestDto,
+  LeaderboardEntriesResponseDto,
+  LeaderboardEntry
+} from '@common'
 
 function getAdjacentCoordinates(
   x: number,
@@ -77,7 +82,9 @@ const useGameStore = defineStore('game', {
     gameOver: false,
     gameWon: false,
     settingsDialog: null as HTMLDialogElement | null,
-    gameOverDialog: null as HTMLDialogElement | null
+    gameOverDialog: null as HTMLDialogElement | null,
+    leaderboard: new Map<GameDifficulty, Map<DateRange, LeaderboardEntry[]>>(),
+    leaderboardSelectedDifficulty: GameDifficulty.Easy
   }),
   getters: {},
   actions: {
@@ -263,53 +270,115 @@ const useGameStore = defineStore('game', {
       this.gameWon = true
       this.gameOverDialog?.showModal()
     },
-    async saveNewTopTime(playerName: string): Promise<string | undefined> {
-      const params = {
-        elapsedTime: this.elapsedTime,
-        difficulty: this.selectedDifficulty,
-        playerName: playerName,
-        timestamp: timestampWon
+    async getLeaderboardEntries(): Promise<void> {
+      const getLeaderboardEntriesRequest = new Request(
+        import.meta.env.VITE_GET_LEADERBOARD_ENTRIES_URL,
+        {
+          method: 'GET'
+        }
+      )
+
+      let getLeaderboardEntriesResponse: Response
+      let getLeaderboardEntriesResponseJson
+      try {
+        getLeaderboardEntriesResponse = await fetch(getLeaderboardEntriesRequest)
+        if (!getLeaderboardEntriesResponse.ok) {
+          const responseErrorMsg = await getLeaderboardEntriesResponse.text()
+          console.error(
+            `HTTP Status: ${getLeaderboardEntriesResponse.status}, Error msg: ${responseErrorMsg}`
+          )
+        }
+
+        getLeaderboardEntriesResponseJson = await getLeaderboardEntriesResponse.json()
+      } catch (e) {
+        console.error('Error while trying to get top times.', e)
+        return
       }
 
-      const request = new Request(import.meta.env.VITE_FUNCTIONS_URL, {
+      let {
+        leaderboardEntriesResponseDto
+      }: { leaderboardEntriesResponseDto: LeaderboardEntriesResponseDto } =
+        getLeaderboardEntriesResponseJson
+      try {
+        leaderboardEntriesResponseDto = ensureLeaderboardEntriesResponseDto(
+          leaderboardEntriesResponseDto
+        )
+      } catch (e) {
+        console.error('Error while trying to validate top times response.', e)
+        return
+      }
+
+      for (const leaderboardEntryResponse of leaderboardEntriesResponseDto) {
+        let dateRangeLeaderboardEntries = this.leaderboard.get(leaderboardEntryResponse.difficulty)
+        if (typeof dateRangeLeaderboardEntries === 'undefined') {
+          dateRangeLeaderboardEntries = new Map<DateRange, LeaderboardEntry[]>()
+          this.leaderboard.set(leaderboardEntryResponse.difficulty, dateRangeLeaderboardEntries)
+        }
+
+        let leaderboardEntries = dateRangeLeaderboardEntries.get(leaderboardEntryResponse.dateRange)
+        if (typeof leaderboardEntries === 'undefined') {
+          leaderboardEntries = []
+          dateRangeLeaderboardEntries.set(leaderboardEntryResponse.dateRange, leaderboardEntries)
+        }
+
+        const leaderboardEntry: LeaderboardEntry = {
+          playerName: leaderboardEntryResponse.playerName,
+          difficulty: leaderboardEntryResponse.difficulty,
+          elapsedTime: leaderboardEntryResponse.elapsedTime,
+          gameWonTimestamp: leaderboardEntryResponse.gameWonTimestamp,
+          dateRange: leaderboardEntryResponse.dateRange,
+          dateRangeRanking: leaderboardEntryResponse.dateRangeRanking
+        }
+        leaderboardEntries.push(leaderboardEntry)
+      }
+    },
+    async saveNewTopTime(playerName: string): Promise<string | undefined> {
+      if (typeof timestampWon === 'undefined') {
+        console.error('Undefined timestamp for when game was won.')
+        return
+      }
+
+      const newTopTimeParamsRequestDto: NewTopTimeParamsRequestDto = {
+        newTopTimeParams: {
+          elapsedTime: this.elapsedTime,
+          difficulty: this.selectedDifficulty,
+          playerName: playerName,
+          gameWonTimestamp: timestampWon
+        }
+      }
+
+      const saveNewTopTimeRequest = new Request(import.meta.env.VITE_SAVE_NEW_TOP_TIME_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
 
-        body: JSON.stringify(params)
+        body: JSON.stringify(newTopTimeParamsRequestDto)
       })
 
       try {
-        const response = await fetch(request)
-        let errorMessage: string = ''
+        const saveNewTopTimeResponse = await fetch(saveNewTopTimeRequest)
 
-        if (response.ok) {
+        if (saveNewTopTimeResponse.ok) {
           timestampWon = undefined
           return
-        } else if (response.status === 400) {
-          const responseJson: { invalidParams: string[] } = await response.json()
-          const { invalidParams } = responseJson
-          if (typeof invalidParams !== 'undefined') {
-            errorMessage = `HTTP Status: ${
-              response.status
-            }, Invalid parameters were sent: ${invalidParams.join(', ')}`
-          } else {
-            errorMessage = `HTTP Status: ${response.status}`
-          }
-        } else if (response.status === 405) {
-          const allowedHttpMethods = response.headers.get('Allow')
-          errorMessage = `HTTP Status: ${response.status}, Allowed Methods: ${allowedHttpMethods}`
+        }
+
+        let errorMessage: string
+        if (saveNewTopTimeResponse.status === 405) {
+          const allowedHttpMethods = saveNewTopTimeResponse.headers.get('Allow')
+          errorMessage = `HTTP Status: ${saveNewTopTimeResponse.status}, Allowed Methods: ${allowedHttpMethods}`
         } else {
-          errorMessage = `HTTP Status: ${response.status}`
+          const responseErrorMsg = await saveNewTopTimeResponse.text()
+          errorMessage = `HTTP Status: ${saveNewTopTimeResponse.status}, Error Msg: ${responseErrorMsg}`
         }
 
         console.error(errorMessage)
-      } catch (error) {
-        console.error('Error while trying to save new top time:', error)
+        return 'Error while trying to save new top time. Please try again.'
+      } catch (e) {
+        console.error('Error while trying to save new top time.', e)
+        return 'Error while trying to save new top time. Please try again.'
       }
-
-      return 'Error while trying to save new top time. Please try again.'
     },
     highlightAdjacentTiles(tileCoordinates: string | undefined = undefined) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps
