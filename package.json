@@ -11,7 +11,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "deploy-serverless": "doctl sls deploy ./serverless",
-    "invoke-save-new-top-time": "doctl sls functions invoke starsweeper/save-new-top-time -n -P ./serverless/test-params/save-new-top-time.json"
+    "invoke-save-new-top-time": "doctl sls functions invoke starsweeper/save-new-top-time -n -P ./serverless/test-params/save-new-top-time.json",
+    "invoke-get-top-times": "doctl sls functions invoke starsweeper/get-top-times -n"
   },
   "dependencies": {
     "pinia": "^2.1.4",
