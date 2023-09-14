@@ -3,7 +3,6 @@ import GameBoard from '@/components/GameBoard.vue'
 import GameBoardHeader from '@/components/GameBoardHeader.vue'
 import VueDialog from '@/components/VueDialog.vue'
 import { useGameStore } from '@/modules/GameStore.mjs'
-import Scoreboard from '@/components/Scoreboard.vue'
 </script>
 
 <script setup lang="ts">
@@ -30,16 +29,13 @@ gameStore.setupGame()
     <div class="game">
       <GameBoardHeader />
       <GameBoard />
-      <VueDialog
-        @setDialogRef="(element) => (gameStore.gameOverDialog = element)"
-        @closeDialog="gameStore.gameOverDialog?.close()"
-        >{{ gameStore.gameWon ? 'You won the game!' : 'You lost the game!' }}</VueDialog
-      >
     </div>
-    <Scoreboard />
+    <VueDialog
+      @setDialogRef="(element) => (gameStore.gameOverDialog = element)"
+      @closeDialog="gameStore.gameOverDialog?.close()"
+      >{{ gameStore.gameWon ? 'You won the game!' : 'You lost the game!' }}</VueDialog
+    >
   </main>
-
-  <footer>TODO footer content</footer>
 </template>
 
 <style>
@@ -53,16 +49,6 @@ header {
 
 main {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  row-gap: 5rem;
-  margin-bottom: 2rem;
-}
-
-footer {
-  border-top-width: 2px;
-  border-top-style: solid;
-  padding: 1.75rem;
 }
 
 .title {
@@ -78,18 +64,6 @@ footer {
   fill: gold;
 }
 
-.visually-hidden {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-
 .game {
   display: flex;
   flex-direction: column;
@@ -99,6 +73,7 @@ footer {
   max-width: fit-content;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 2rem;
   padding: 1.75rem;
   border-radius: 0.3rem;
 }
