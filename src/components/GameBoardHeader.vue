@@ -1,7 +1,7 @@
 <script import lang="ts">
 import { useGameStore } from '@/modules/GameStore.mjs'
 import VueDialog from '@/components/VueDialog.vue'
-import { GameDifficulty } from '@/modules/GameEnums.mjs'
+import { GameDifficulty } from '@common'
 </script>
 
 <script setup lang="ts">
