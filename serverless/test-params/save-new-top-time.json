@@ -2,8 +2,10 @@
   "http": {
     "method": "POST"
   },
-  "playerName": "tester",
-  "difficulty": 1,
-  "elapsedTime": 9,
-  "timestamp": "2023-08-23T15:40:02.615Z"
+  "newTopTimeParams": {
+    "playerName": "tester",
+    "difficulty": 2,
+    "elapsedTime": 1,
+    "gameWonTimestamp123": "2023-08-29T15:40:02.615Z"
+  }
 }
