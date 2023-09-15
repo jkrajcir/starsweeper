@@ -84,11 +84,12 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
     class="game-board"
   >
     <h1 class="visually-hidden">Game board</h1>
-    <Tile
+    <template
       v-for="tileProps of gameStore.tileCoordinatesToTileProps.values()"
       :key="tileProps.id"
-      :tile-props="tileProps"
-    />
+    >
+      <Tile :tile-props="tileProps" />
+    </template>
   </div>
 </template>
 
