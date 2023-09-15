@@ -48,16 +48,23 @@ const personalBestTime = computed(
       <template v-for="dateRange of dateRangeEnums">
         <div class="top-times-card">
           <h3>{{ DateRangeNames.get(dateRange) }}</h3>
-          <ol>
-            <template v-for="leaderboardEntry of leaderboardForSelectedDifficulty?.get(dateRange)">
-              <li>
-                <span class="leaderboard-entry">
-                  <span class="fw-bold">{{ leaderboardEntry.elapsedTime }}</span> by
-                  <span class="fw-bold">{{ leaderboardEntry.playerName }}</span>
-                </span>
-              </li>
-            </template>
-          </ol>
+          <template v-if="!leaderboardForSelectedDifficulty?.get(dateRange)?.length">
+            <div class="no-top-times">No top times yet...</div>
+          </template>
+          <template v-else>
+            <ol>
+              <template
+                v-for="leaderboardEntry of leaderboardForSelectedDifficulty?.get(dateRange)"
+              >
+                <li>
+                  <span class="leaderboard-entry">
+                    <span class="fw-bold">{{ leaderboardEntry.elapsedTime }}</span> by
+                    <span class="fw-bold">{{ leaderboardEntry.playerName }}</span>
+                  </span>
+                </li>
+              </template>
+            </ol>
+          </template>
         </div>
       </template>
     </div>
@@ -100,6 +107,12 @@ const personalBestTime = computed(
   background-color: honeydew;
   border-radius: 0.3rem;
   flex: 1 1 0;
+}
+
+.no-top-times {
+  margin: auto;
+  font-size: 1.25rem;
+  font-weight: bold;
 }
 
 .leaderboard-entry {
