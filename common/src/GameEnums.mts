@@ -12,4 +12,12 @@ enum DateRange {
   AllTime
 }
 
-export { GameDifficulty, DateRange }
+const DateRangeNames: Map<DateRange, string> = new Map([
+  [DateRange.Today, 'Today'],
+  [DateRange.Last7Days, 'Last 7 Days'],
+  [DateRange.Last30Days, 'Last 30 Days'],
+  [DateRange.Last1Year, 'Last Year'],
+  [DateRange.AllTime, 'All Time']
+])
+
+export { GameDifficulty, DateRange, DateRangeNames }

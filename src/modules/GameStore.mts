@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useLocalStorage } from '@vueuse/core'
 import { TileProperties } from '@/modules/TileProperties.mjs'
 import { TileStatus, TileType } from '@/modules/TileEnums.mjs'
 import { DateRange, GameDifficulty, ensureLeaderboardEntriesResponseDto } from '@common'
@@ -71,6 +72,15 @@ difficultySettings[GameDifficulty.Easy] = { boardX: 9, boardY: 9, totalStars: 10
 difficultySettings[GameDifficulty.Normal] = { boardX: 16, boardY: 16, totalStars: 40 }
 difficultySettings[GameDifficulty.Hard] = { boardX: 30, boardY: 16, totalStars: 99 }
 
+const personalBestTimesKeyPrefix = 'personalBest:'
+function personalBestTimesInit() {
+  return new Map([
+    [GameDifficulty.Easy, useLocalStorage(personalBestTimesKeyPrefix + GameDifficulty.Easy, 0)],
+    [GameDifficulty.Normal, useLocalStorage(personalBestTimesKeyPrefix + GameDifficulty.Normal, 0)],
+    [GameDifficulty.Hard, useLocalStorage(personalBestTimesKeyPrefix + GameDifficulty.Hard, 0)]
+  ])
+}
+
 const useGameStore = defineStore('game', {
   state: () => ({
     tileCoordinatesToTileProps: new Map<string, TileProperties>(),
@@ -83,7 +93,8 @@ const useGameStore = defineStore('game', {
     settingsDialog: null as HTMLDialogElement | null,
     gameOverDialog: null as HTMLDialogElement | null,
     leaderboard: new Map<GameDifficulty, Map<DateRange, LeaderboardEntry[]>>(),
-    leaderboardSelectedDifficulty: GameDifficulty.Easy
+    leaderboardSelectedDifficulty: GameDifficulty.Easy,
+    personalBestTimes: new Map(personalBestTimesInit())
   }),
   getters: {
     boardX: (state) => difficultySettings[state.selectedDifficulty].boardX,
@@ -100,6 +111,7 @@ const useGameStore = defineStore('game', {
         gameDifficulty = this.selectedDifficulty
       } else {
         this.selectedDifficulty = gameDifficulty
+        this.leaderboardSelectedDifficulty = this.selectedDifficulty
         randomKey = Math.random()
         this.tileCoordinatesToTileProps.clear()
       }
@@ -269,6 +281,14 @@ const useGameStore = defineStore('game', {
         }
       }
 
+      const personalBestTime = this.personalBestTimes.get(this.selectedDifficulty)
+      if (
+        typeof personalBestTime !== 'undefined' &&
+        (!personalBestTime.value || this.elapsedTime < personalBestTime.value)
+      ) {
+        personalBestTime.value = this.elapsedTime
+      }
+
       this.gameOver = true
       this.gameWon = true
       this.gameOverDialog?.showModal()
@@ -333,6 +353,14 @@ const useGameStore = defineStore('game', {
           dateRangeRanking: leaderboardEntryResponse.dateRangeRanking
         }
         leaderboardEntries.push(leaderboardEntry)
+      }
+
+      for (const leaderboardByDifficulty of this.leaderboard) {
+        for (const leaderboardByDateRange of leaderboardByDifficulty[1]) {
+          leaderboardByDateRange[1].sort(
+            (firstEntry, secondEntry) => firstEntry.dateRangeRanking - secondEntry.dateRangeRanking
+          )
+        }
       }
     },
     async saveNewTopTime(playerName: string): Promise<string | undefined> {
