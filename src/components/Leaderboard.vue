@@ -1,10 +1,25 @@
 <script import lang="ts">
-import { GameDifficulty } from '@common'
+import { DateRange, GameDifficulty, DateRangeNames } from '@common'
 import { useGameStore } from '@/modules/GameStore.mjs'
+import { computed } from 'vue'
 </script>
 
 <script setup lang="ts">
 const gameStore = useGameStore()
+
+const gameDifficultyEnums = Object.keys(GameDifficulty)
+  .map((key) => Number.parseInt(key))
+  .filter((key) => Number.isInteger(key))
+const dateRangeEnums = Object.keys(DateRange)
+  .map((value) => Number.parseInt(value))
+  .filter((key) => Number.isInteger(key))
+
+const leaderboardForSelectedDifficulty = computed(() =>
+  gameStore.leaderboard.get(gameStore.leaderboardSelectedDifficulty)
+)
+const personalBestTime = computed(
+  () => gameStore.personalBestTimes.get(gameStore.leaderboardSelectedDifficulty)?.value
+)
 </script>
 
 <template>
@@ -13,40 +28,38 @@ const gameStore = useGameStore()
     <div class="leaderboard-header difficulty-pb">
       <label>
         Difficulty:
-        <select v-model="gameStore.selectedDifficulty">
-          <option :value="GameDifficulty.Easy">{{ GameDifficulty[GameDifficulty.Easy] }}</option>
-          <option :value="GameDifficulty.Normal">
-            {{ GameDifficulty[GameDifficulty.Normal] }}
-          </option>
-          <option :value="GameDifficulty.Hard">{{ GameDifficulty[GameDifficulty.Hard] }}</option>
+        <select class="fw-bold" v-model="gameStore.leaderboardSelectedDifficulty">
+          <template v-for="gameDifficulty of gameDifficultyEnums">
+            <option class="fw-bold" :value="gameDifficulty">
+              {{ GameDifficulty[gameDifficulty] }}
+            </option>
+          </template>
         </select>
       </label>
-      <span>Personal best: 25</span>
+      <span
+        >Personal Best:
+        <span class="player-score">{{
+          personalBestTime ? `${personalBestTime} seconds` : 'Beat the game to set a personal best!'
+        }}</span></span
+      >
     </div>
-    <h2 class="leaderboard-header">Top 10 times for:</h2>
+    <h2 class="leaderboard-header">Top 10 Times:</h2>
     <div class="top-times">
-      <div class="top-times-card">
-        <h3>Today</h3>
-        <ol>
-          <li>25 by <span class="player-name">player1</span></li>
-        </ol>
-      </div>
-      <div class="top-times-card">
-        <h3>Last 7 days</h3>
-        <ol></ol>
-      </div>
-      <div class="top-times-card">
-        <h3>Last 30 days</h3>
-        <ol></ol>
-      </div>
-      <div class="top-times-card">
-        <h3>Last year</h3>
-        <ol></ol>
-      </div>
-      <div class="top-times-card">
-        <h3>All time</h3>
-        <ol></ol>
-      </div>
+      <template v-for="dateRange of dateRangeEnums">
+        <div class="top-times-card">
+          <h3>{{ DateRangeNames.get(dateRange) }}</h3>
+          <ol>
+            <template v-for="leaderboardEntry of leaderboardForSelectedDifficulty?.get(dateRange)">
+              <li>
+                <span class="leaderboard-entry">
+                  <span class="fw-bold">{{ leaderboardEntry.elapsedTime }}</span> by
+                  <span class="fw-bold">{{ leaderboardEntry.playerName }}</span>
+                </span>
+              </li>
+            </template>
+          </ol>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -80,14 +93,25 @@ const gameStore = useGameStore()
 }
 
 .top-times-card {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.75rem;
   padding: 1.5rem;
   background-color: honeydew;
   border-radius: 0.3rem;
-  flex-grow: 1;
-  flex-shrink: 0;
+  flex: 1 1 0;
 }
 
+.leaderboard-entry {
+  margin-left: 0.5rem;
+}
+
+.player-score,
 .player-name {
+  font-weight: bold;
+}
+
+.fw-bold {
   font-weight: bold;
 }
 </style>
