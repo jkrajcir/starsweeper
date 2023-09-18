@@ -30,7 +30,7 @@ function highlightAdjacentTiles(mouseEvent: MouseEvent | undefined = undefined) 
 const gameStore = useGameStore()
 
 function gameBoardClick(mouseEvent: MouseEvent) {
-  if (gameStore.gameOver) {
+  if (gameStore.gameLost || gameStore.gameWon) {
     return
   }
 
@@ -47,7 +47,7 @@ function gameBoardClick(mouseEvent: MouseEvent) {
 }
 
 function gameBoardMiddleClick(mousedown: boolean, mouseEvent: MouseEvent) {
-  if (gameStore.gameOver) {
+  if (gameStore.gameLost || gameStore.gameWon) {
     return
   }
 
@@ -61,7 +61,7 @@ function gameBoardMiddleClick(mousedown: boolean, mouseEvent: MouseEvent) {
 }
 
 function gameBoardRightClick(mouseEvent: MouseEvent) {
-  if (gameStore.gameOver) {
+  if (gameStore.gameLost || gameStore.gameWon) {
     return
   }
 
