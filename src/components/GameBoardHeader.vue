@@ -41,8 +41,8 @@ function toggleFlagging() {
       </button>
       <VueDialog
         class="settings-dialog"
-        @setDialogRef="(element) => (gameStore.settingsDialog = element)"
-        @closeButton="gameStore.settingsDialog?.close()"
+        @set-dialog-ref="(element) => (gameStore.settingsDialog = element)"
+        @close-button="gameStore.settingsDialog?.close()"
       >
         <span class="settings-header">Difficulty:</span>
         <button class="btn btn-seagreen btn-icon" @click="gameStore.setupGame(GameDifficulty.Easy)">
