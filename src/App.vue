@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import GameBoard from '@/components/GameBoard.vue'
 import GameBoardHeader from '@/components/GameBoardHeader.vue'
 import VueDialog from '@/components/VueDialog.vue'
-import Leaderboard from '@/components/Leaderboard.vue'
+import GameLeaderboard from '@/components/GameLeaderboard.vue'
 import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
@@ -62,8 +62,8 @@ async function closeDialog(saveTopTime: boolean = false) {
       <GameBoardHeader />
       <GameBoard />
       <VueDialog
-        @setDialogRef="(element) => (gameStore.gameOverDialog = element)"
-        @closeButton="gameStore.gameOverDialog?.close()"
+        @set-dialog-ref="(element) => (gameStore.gameOverDialog = element)"
+        @close-button="gameStore.gameOverDialog?.close()"
       >
         <div class="gameover-dialog-result">
           <template v-if="gameStore.gameWon">
@@ -118,10 +118,8 @@ async function closeDialog(saveTopTime: boolean = false) {
         </template>
       </VueDialog>
     </div>
-    <Leaderboard />
+    <GameLeaderboard />
   </main>
-
-  <footer>TODO footer content</footer>
 </template>
 
 <style lang="scss">
@@ -141,12 +139,6 @@ main {
   flex-direction: column;
   row-gap: 5rem;
   margin-bottom: 2rem;
-}
-
-footer {
-  border-top-width: 2px;
-  border-top-style: solid;
-  padding: 1.75rem;
 }
 
 .title {

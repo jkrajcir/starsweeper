@@ -1,5 +1,5 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "compilerOptions": {
     "baseUrl": ".",
@@ -10,10 +10,5 @@
     "strict": true
   },
 
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    { "path": "./common/" }
-  ]
+  "references": [{ "path": "./common/" }]
 }
