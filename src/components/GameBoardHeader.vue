@@ -98,7 +98,7 @@ function toggleFlagging() {
         <button
           class="btn btn-seagreen btn-icon toggle-flag-button"
           @click="toggleFlagging()"
-          :disabled="gameStore.gameOver"
+          :disabled="gameStore.gameLost || gameStore.gameWon"
         >
           <svg
             class="prohibit-icon"

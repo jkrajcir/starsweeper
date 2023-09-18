@@ -1,21 +1,25 @@
 <script import lang="ts">
+import { ref } from 'vue'
 import GameBoard from '@/components/GameBoard.vue'
 import GameBoardHeader from '@/components/GameBoardHeader.vue'
 import VueDialog from '@/components/VueDialog.vue'
-import { useGameStore } from '@/modules/GameStore.mjs'
 import Leaderboard from '@/components/Leaderboard.vue'
-import { ref } from 'vue'
+import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
 <script setup lang="ts">
 const gameStore = useGameStore()
 gameStore.setupGame()
-gameStore.getLeaderboardEntries()
 let playerName: string | undefined = undefined
 const nameInputElement = ref<HTMLInputElement | null>(null)
 
 async function closeDialog(saveTopTime: boolean = false) {
-  if (saveTopTime && nameInputElement.value) {
+  if (!saveTopTime) {
+    gameStore.gameOverDialog?.close()
+    return
+  }
+
+  if (nameInputElement.value) {
     if (!playerName) {
       nameInputElement.value.setCustomValidity('Name required to save new top time.')
       nameInputElement.value.reportValidity()
@@ -34,8 +38,6 @@ async function closeDialog(saveTopTime: boolean = false) {
       playerName = undefined
       gameStore.gameOverDialog?.close()
     }
-  } else {
-    gameStore.gameOverDialog?.close()
   }
 }
 </script>
@@ -64,16 +66,27 @@ async function closeDialog(saveTopTime: boolean = false) {
         @closeButton="gameStore.gameOverDialog?.close()"
       >
         <div class="gameover-dialog-result">
-          {{
-            gameStore.gameWon
-              ? `You won the game in ${gameStore.elapsedTime} seconds!`
-              : 'You lost the game!'
-          }}
+          <template v-if="gameStore.gameWon">
+            <p>{{ `You won the game in ${gameStore.elapsedTime} seconds!` }}</p>
+            <template v-if="gameStore.newPersonalBestTime">
+              <p>
+                {{
+                  gameStore.previousPersonalBestTime
+                    ? `You beat your previous best time of ${gameStore.previousPersonalBestTime}!`
+                    : `Play again and try to get a new personal best time!`
+                }}
+              </p>
+            </template>
+          </template>
+
+          <template v-else>
+            {{ 'You lost the game!' }}
+          </template>
         </div>
 
-        <template v-if="gameStore.gameWon">
+        <template v-if="gameStore.placedOnLeaderboard">
           <div class="dialog-msg">
-            <p>You also placed into a top time!</p>
+            <p>You also placed onto the leaderboard!</p>
             <p>Enter a name below for your winning time:</p>
           </div>
           <label class="name-label">
@@ -87,8 +100,20 @@ async function closeDialog(saveTopTime: boolean = false) {
             />
           </label>
         </template>
-        <template v-if="gameStore.gameWon" #close>
-          <button class="btn btn-seagreen" @click="closeDialog(true)">Save</button>
+        <template v-if="gameStore.placedOnLeaderboard" #close>
+          <button
+            class="btn btn-seagreen"
+            @click="
+              (_) => {
+                if (!gameStore.savingNewTopTime) {
+                  closeDialog(true)
+                }
+              }
+            "
+            :disabled="gameStore.savingNewTopTime"
+          >
+            Save
+          </button>
           <button class="btn btn-lightcoral" @click="closeDialog()">Cancel</button>
         </template>
       </VueDialog>
@@ -100,6 +125,8 @@ async function closeDialog(saveTopTime: boolean = false) {
 </template>
 
 <style lang="scss">
+@use 'sass:color';
+
 header {
   padding: 2.5rem 0;
   display: flex;
@@ -182,6 +209,11 @@ footer {
   }
   &.btn-seagreen {
     background-color: seagreen;
+
+    &:disabled {
+      color: color.grayscale($color: lightyellow);
+      background-color: color.grayscale($color: seagreen);
+    }
   }
   &.btn-icon {
     column-gap: 0.3rem;
@@ -189,9 +221,12 @@ footer {
 }
 
 .gameover-dialog-result {
-  font-weight: bold;
   font-size: 1.2rem;
   text-align: center;
+
+  & p {
+    font-weight: bold;
+  }
 }
 
 .name-label {
