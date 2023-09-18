@@ -88,13 +88,17 @@ const useGameStore = defineStore('game', {
     selectedDifficulty: GameDifficulty.Easy,
     flagsRemaining: difficultySettings[GameDifficulty.Easy].totalStars,
     flagOnly: false,
-    gameOver: false,
+    gameLost: false,
     gameWon: false,
+    placedOnLeaderboard: false,
+    newPersonalBestTime: false,
+    previousPersonalBestTime: undefined as number | undefined,
     settingsDialog: null as HTMLDialogElement | null,
     gameOverDialog: null as HTMLDialogElement | null,
     leaderboard: new Map<GameDifficulty, Map<DateRange, LeaderboardEntry[]>>(),
     leaderboardSelectedDifficulty: GameDifficulty.Easy,
-    personalBestTimes: new Map(personalBestTimesInit())
+    personalBestTimes: new Map(personalBestTimesInit()),
+    savingNewTopTime: false
   }),
   getters: {
     boardX: (state) => difficultySettings[state.selectedDifficulty].boardX,
@@ -106,10 +110,9 @@ const useGameStore = defineStore('game', {
         clearInterval(gameTimerIntervalId)
         gameTimerIntervalId = 0
       }
+      this.getLeaderboardEntries()
 
-      if (typeof gameDifficulty === 'undefined') {
-        gameDifficulty = this.selectedDifficulty
-      } else {
+      if (typeof gameDifficulty !== 'undefined') {
         this.selectedDifficulty = gameDifficulty
         this.leaderboardSelectedDifficulty = this.selectedDifficulty
         randomKey = Math.random()
@@ -179,8 +182,10 @@ const useGameStore = defineStore('game', {
       this.elapsedTime = 0
       this.flagOnly = false
       this.flagsRemaining = totalStars
-      this.gameOver = false
+      this.gameLost = false
       this.gameWon = false
+      this.newPersonalBestTime = false
+      this.placedOnLeaderboard = false
       this.gameOverDialog?.close()
       this.settingsDialog?.close()
     },
@@ -218,7 +223,7 @@ const useGameStore = defineStore('game', {
           }
         }
 
-        this.gameOver = true
+        this.gameLost = true
         this.gameOverDialog?.showModal()
         clickedTileProps.starOpened = true
 
@@ -274,6 +279,7 @@ const useGameStore = defineStore('game', {
 
       timestampWon = new Date().toISOString()
 
+      // put a flag on star tiles that don't have one yet
       for (const tileProps of this.tileCoordinatesToTileProps.values()) {
         if (tileProps.tileType === TileType.Star && tileProps.tileStatus !== TileStatus.Flagged) {
           this.flagsRemaining--
@@ -281,16 +287,30 @@ const useGameStore = defineStore('game', {
         }
       }
 
+      this.gameWon = true
+      this.placedOnLeaderboard =
+        !this.leaderboard.has(this.selectedDifficulty) ||
+        !this.leaderboard.get(this.selectedDifficulty)!.has(DateRange.Today) ||
+        this.leaderboard.get(this.selectedDifficulty)!.get(DateRange.Today)!.length === 0 ||
+        this.leaderboard.get(this.selectedDifficulty)!.get(DateRange.Today)!.length < 10 ||
+        this.leaderboard
+          .get(this.selectedDifficulty)!
+          .get(DateRange.Today)!
+          .some((leaderboardEntry) => this.elapsedTime < leaderboardEntry.elapsedTime)
       const personalBestTime = this.personalBestTimes.get(this.selectedDifficulty)
       if (
         typeof personalBestTime !== 'undefined' &&
         (!personalBestTime.value || this.elapsedTime < personalBestTime.value)
       ) {
+        if (!personalBestTime.value) {
+          this.previousPersonalBestTime = undefined
+        } else {
+          this.previousPersonalBestTime = personalBestTime.value
+        }
         personalBestTime.value = this.elapsedTime
+        this.newPersonalBestTime = true
       }
 
-      this.gameOver = true
-      this.gameWon = true
       this.gameOverDialog?.showModal()
     },
     async getLeaderboardEntries(): Promise<void> {
@@ -331,6 +351,8 @@ const useGameStore = defineStore('game', {
         return
       }
 
+      this.leaderboard.clear()
+
       for (const leaderboardEntryResponse of leaderboardEntriesResponseDto) {
         let dateRangeLeaderboardEntries = this.leaderboard.get(leaderboardEntryResponse.difficulty)
         if (typeof dateRangeLeaderboardEntries === 'undefined') {
@@ -366,8 +388,9 @@ const useGameStore = defineStore('game', {
     async saveNewTopTime(playerName: string): Promise<string | undefined> {
       if (typeof timestampWon === 'undefined') {
         console.error('Undefined timestamp for when game was won.')
-        return
+        return `Can't save new top time. No timestamp for when game was won.`
       }
+      this.savingNewTopTime = true
 
       const newTopTimeParamsRequestDto: NewTopTimeParamsRequestDto = {
         newTopTimeParams: {
@@ -391,7 +414,9 @@ const useGameStore = defineStore('game', {
         const saveNewTopTimeResponse = await fetch(saveNewTopTimeRequest)
 
         if (saveNewTopTimeResponse.ok) {
+          this.getLeaderboardEntries()
           timestampWon = undefined
+          this.savingNewTopTime = false
           return
         }
 
@@ -405,11 +430,12 @@ const useGameStore = defineStore('game', {
         }
 
         console.error(errorMessage)
-        return 'Error while trying to save new top time. Please try again.'
       } catch (e) {
         console.error('Error while trying to save new top time.', e)
-        return 'Error while trying to save new top time. Please try again.'
       }
+
+      this.savingNewTopTime = false
+      return 'Error while trying to save new top time. Please try again.'
     },
     highlightAdjacentTiles(tileCoordinates: string | undefined = undefined) {
       const tileCoordinatesToTileProps = this.tileCoordinatesToTileProps

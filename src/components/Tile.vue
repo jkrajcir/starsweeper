@@ -46,7 +46,8 @@ const classObject = computed(() => ({
   highlighted: tileProps.highlighted,
   flagged: tileProps.tileStatus === TileStatus.Flagged,
   'incorrectly-flagged': tileProps.tileStatus === TileStatus.IncorrectlyFlagged,
-  'game-over': gameStore.gameOver && tileProps.tileStatus === TileStatus.Unopened
+  'game-over':
+    (gameStore.gameLost || gameStore.gameWon) && tileProps.tileStatus === TileStatus.Unopened
 }))
 
 const styleObject = computed(() => ({
