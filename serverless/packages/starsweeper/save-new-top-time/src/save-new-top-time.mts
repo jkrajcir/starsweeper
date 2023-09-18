@@ -5,7 +5,7 @@ import { ClientConfig, QueryConfig } from 'pg'
 import { ValidationError } from 'suretype'
 import { SaveNewTopTimeEvent, ensureSaveNewTopTimeEvent } from './SaveNewTopTimeEvent.mjs'
 
-async function saveNewTopTime(event: SaveNewTopTimeEvent, context: {}): Promise<{}> {
+async function saveNewTopTime(event: SaveNewTopTimeEvent): Promise<{}> {
   let responseErrorMsg: string | undefined = undefined
   let statusCode: number
   let headers: { Allow: string } | undefined = undefined

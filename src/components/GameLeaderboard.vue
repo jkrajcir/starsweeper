@@ -29,7 +29,7 @@ const personalBestTime = computed(
       <label>
         Difficulty:
         <select class="fw-bold" v-model="gameStore.leaderboardSelectedDifficulty">
-          <template v-for="gameDifficulty of gameDifficultyEnums">
+          <template v-for="gameDifficulty of gameDifficultyEnums" :key="gameDifficulty">
             <option class="fw-bold" :value="gameDifficulty">
               {{ GameDifficulty[gameDifficulty] }}
             </option>
@@ -45,7 +45,7 @@ const personalBestTime = computed(
     </div>
     <h2 class="leaderboard-header">Top 10 Times:</h2>
     <div class="top-times">
-      <template v-for="dateRange of dateRangeEnums">
+      <template v-for="dateRange of dateRangeEnums" :key="dateRange">
         <div class="top-times-card">
           <h3>{{ DateRangeNames.get(dateRange) }}</h3>
           <template v-if="!leaderboardForSelectedDifficulty?.get(dateRange)?.length">
@@ -55,6 +55,13 @@ const personalBestTime = computed(
             <ol>
               <template
                 v-for="leaderboardEntry of leaderboardForSelectedDifficulty?.get(dateRange)"
+                :key="
+                  [
+                    leaderboardEntry.difficulty,
+                    leaderboardEntry.dateRange,
+                    leaderboardEntry.gameWonTimestamp
+                  ].join('')
+                "
               >
                 <li>
                   <span class="leaderboard-entry">

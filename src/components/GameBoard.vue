@@ -1,5 +1,5 @@
 <script import lang="ts">
-import Tile from './Tile.vue'
+import GameTile from '@/components/GameTile.vue'
 import { useGameStore } from '@/modules/GameStore.mjs'
 </script>
 
@@ -88,7 +88,7 @@ function gameBoardRightClick(mouseEvent: MouseEvent) {
       v-for="tileProps of gameStore.tileCoordinatesToTileProps.values()"
       :key="tileProps.id"
     >
-      <Tile :tile-props="tileProps" />
+      <GameTile :tile-props="tileProps" />
     </template>
   </div>
 </template>

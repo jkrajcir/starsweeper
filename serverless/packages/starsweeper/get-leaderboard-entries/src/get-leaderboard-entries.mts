@@ -6,9 +6,9 @@ import {
   TopTimeWithRankingDbResults,
   ensureTopTimeWithRankingDbResults
 } from './TopTimeWithRankingDbResults.mjs'
-import { LeaderboardEntry, LeaderboardEntriesResponseDto, DateRange, GameDifficulty } from '@common'
+import { LeaderboardEntry, LeaderboardEntriesResponseDto, DateRange } from '@common'
 
-async function getLeaderboardEntries(args: {}): Promise<{}> {
+async function getLeaderboardEntries(): Promise<{}> {
   const clientConfig: ClientConfig = {
     user: env.DB_USER,
     password: env.DB_PASSWORD,
