@@ -18,7 +18,6 @@ function toggleFlagging() {
 
 <template>
   <div class="game-header">
-    <h1 class="visually-hidden">Game board header</h1>
     <div class="game-header-top">
       <button class="btn btn-seagreen btn-icon game-header-button" @click="newGame()">
         <svg class="game-header-icon" width="24" height="24" viewBox="0 0 24 24">
