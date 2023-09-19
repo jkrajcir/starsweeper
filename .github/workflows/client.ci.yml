@@ -1,0 +1,31 @@
+name: Client CI
+
+on:
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - '.env'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      - name: 'Common module: Install deps and compile'
+        run: |
+          cd ./common/
+          npm ci
+          npx tsc
+      - name: 'Client: Install deps and build'
+        run: |
+          npm ci
+          npm run build
+      # - run: npm test
