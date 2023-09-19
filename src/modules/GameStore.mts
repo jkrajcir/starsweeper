@@ -85,6 +85,7 @@ const useGameStore = defineStore('game', {
   state: () => ({
     tileCoordinatesToTileProps: new Map<string, TileProperties>(),
     elapsedTime: 0,
+    selectedDifficulty: GameDifficulty.Easy,
     flagsRemaining: difficultySettings[selectedDifficulty].totalStars,
     boardX: difficultySettings[selectedDifficulty].boardX,
     boardY: difficultySettings[selectedDifficulty].boardY,
