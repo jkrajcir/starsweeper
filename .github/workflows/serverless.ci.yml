@@ -1,0 +1,34 @@
+name: Serverless functions CI
+
+on:
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'serverless/**'
+      - 'common/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      - name: 'Common module: Install deps and compile'
+        run: |
+          cd common
+          npm ci
+      - name: 'get-leaderboard-entries: Install deps and build'
+        run: |
+          cd serverless/packages/starsweeper/get-leaderboard-entries
+          npm ci
+          npm run build
+      - name: 'save-new-top-time: Install deps and build'
+        run: |
+          cd serverless/packages/starsweeper/save-new-top-time
+          npm ci
+          npm run build
