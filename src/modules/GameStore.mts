@@ -12,7 +12,8 @@ import type {
 function getAdjacentCoordinates(
   x: number,
   y: number,
-  visitedCoordinates: Set<string>
+  visitedCoordinates: Set<string>,
+  selectedDifficulty: GameDifficulty
 ): Set<string> {
   const adjacentX1: number = x + 1
   const adjacentXn1: number = x - 1
@@ -118,9 +119,7 @@ const useGameStore = defineStore('game', {
         this.tileCoordinatesToTileProps.clear()
       }
 
-      this.boardX = difficultySettings[selectedDifficulty].boardX
-      this.boardY = difficultySettings[selectedDifficulty].boardY
-      const totalStars = difficultySettings[selectedDifficulty].totalStars
+      const totalStars = difficultySettings[this.selectedDifficulty].totalStars
 
       const starCoordinatesSet: Set<string> = new Set<string>()
       do {
@@ -135,7 +134,12 @@ const useGameStore = defineStore('game', {
         const starX: number = Number.parseInt(starCoordinatesArr[0])
         const starY: number = Number.parseInt(starCoordinatesArr[1])
 
-        const adjacentCoordinates = getAdjacentCoordinates(starX, starY, starCoordinatesSet)
+        const adjacentCoordinates = getAdjacentCoordinates(
+          starX,
+          starY,
+          starCoordinatesSet,
+          this.selectedDifficulty
+        )
 
         for (const adjacentCoordinate of adjacentCoordinates) {
           const adjacentCoordinatesArr = adjacentCoordinate.split(',')
@@ -235,7 +239,8 @@ const useGameStore = defineStore('game', {
           const adjacentTileToOpenCoordinates = getAdjacentCoordinates(
             Number.parseInt(tileCoordinateToVisit.split(',')[0]),
             Number.parseInt(tileCoordinateToVisit.split(',')[1]),
-            tileCoordinatesToOpen
+            tileCoordinatesToOpen,
+            this.selectedDifficulty
           )
 
           for (const tileToOpenCoordinates of adjacentTileToOpenCoordinates) {
@@ -450,7 +455,12 @@ const useGameStore = defineStore('game', {
       const tileCoordinatesArr = tileCoordinates.split(',')
       const tileX = Number.parseInt(tileCoordinatesArr[0])
       const tileY = Number.parseInt(tileCoordinatesArr[1])
-      const tilesToHighlightCoordinates = getAdjacentCoordinates(tileX, tileY, new Set<string>())
+      const tilesToHighlightCoordinates = getAdjacentCoordinates(
+        tileX,
+        tileY,
+        new Set<string>(),
+        this.selectedDifficulty
+      )
 
       for (const tileToHighlightCoordinate of tilesToHighlightCoordinates) {
         const tileToHighlightProps = tileCoordinatesToTileProps.get(tileToHighlightCoordinate)
