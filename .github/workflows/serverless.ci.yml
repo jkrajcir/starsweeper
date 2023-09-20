@@ -25,10 +25,10 @@ jobs:
       - name: 'get-leaderboard-entries: Install deps and build'
         run: |
           cd serverless/packages/starsweeper/get-leaderboard-entries
-          npm ci
+          npm install
           npm run build
       - name: 'save-new-top-time: Install deps and build'
         run: |
           cd serverless/packages/starsweeper/save-new-top-time
-          npm ci
+          npm install
           npm run build
