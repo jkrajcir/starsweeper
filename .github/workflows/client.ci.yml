@@ -7,6 +7,7 @@ on:
       - 'src/**'
       - 'public/**'
       - '.env'
+      - 'common/**'
 
 jobs:
   build:
@@ -21,7 +22,7 @@ jobs:
           cache: 'npm'
       - name: 'Common module: Install deps and compile'
         run: |
-          cd ./common/
+          cd common
           npm ci
           npx tsc
       - name: 'Client: Install deps and build'
