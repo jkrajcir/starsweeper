@@ -1,9 +1,9 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../lib/tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "ts-out"
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../../../../common/" }]
+  "references": [{ "path": "../../../lib/common/" }]
 }
