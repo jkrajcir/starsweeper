@@ -18,17 +18,15 @@ jobs:
         with:
           node-version: '18.x'
           cache: 'npm'
-      - name: 'Common module: Install deps and compile'
+      - name: 'Common module: build script'
         run: |
-          cd common
-          npm ci
-      - name: 'get-leaderboard-entries: Install deps and build'
+          cd serverless/lib
+          ./build.sh
+      - name: 'get-leaderboard-entries: build script'
         run: |
           cd serverless/packages/starsweeper/get-leaderboard-entries
-          npm install
-          npm run build
-      - name: 'save-new-top-time: Install deps and build'
+          ./build.sh
+      - name: 'save-new-top-time: build script'
         run: |
           cd serverless/packages/starsweeper/save-new-top-time
-          npm install
-          npm run build
+          ./build.sh
