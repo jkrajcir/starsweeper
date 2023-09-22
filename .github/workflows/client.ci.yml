@@ -24,7 +24,7 @@ jobs:
         run: |
           cd common
           npm ci
-          npx tsc
+          npm run build
       - name: 'Client: Install deps and build'
         run: |
           npm ci
