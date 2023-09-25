@@ -4,9 +4,7 @@ on:
   pull_request:
     branches: ['main']
     paths:
-      - 'src/**'
-      - 'public/**'
-      - '.env'
+      - 'client/**'
       - 'common/**'
 
 jobs:
@@ -27,6 +25,7 @@ jobs:
           npm run build
       - name: 'Client: Install deps and build'
         run: |
+          cd client
           npm ci
           npm run build
       # - run: npm test
