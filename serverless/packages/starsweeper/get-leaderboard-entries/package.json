@@ -1,6 +1,9 @@
 {
   "main": "lib/get-leaderboard-entries.mjs",
   "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.0.0",
     "@rollup/plugin-commonjs": "^25.0.4",
