@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "deploy-serverless": "doctl sls deploy ./serverless",
+    "invoke-save-new-top-time": "doctl sls functions invoke starsweeper/save-new-top-time -n -P ./serverless/test-params/save-new-top-time.json",
+    "invoke-get-top-times": "doctl sls functions invoke starsweeper/get-top-times -n"
+  },
   "devDependencies": {
     "eslint": "^8.50.0",
     "prettier": "^3.0.3",
