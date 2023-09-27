@@ -71,7 +71,7 @@ main {
   display: flex;
   flex-direction: column;
   row-gap: 5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 7rem;
 }
 
 footer {
