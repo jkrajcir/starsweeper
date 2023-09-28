@@ -25,6 +25,7 @@ packages:
         limits:
           timeout: 300
           memory: 256
+          logs: 1024
       - name: get-leaderboard-entries
         binary: false
         main: ''
@@ -37,3 +38,4 @@ packages:
         limits:
           timeout: 300
           memory: 256
+          logs: 1024
