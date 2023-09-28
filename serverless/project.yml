@@ -10,6 +10,7 @@ packages:
       DB_PORT: '${DB_PORT}'
       DB_NAME: '${DB_NAME}'
       DB_CA: '${DB_CA}'
+      LOG_DESTINATIONS: ${LOG_DESTINATIONS}
     parameters: {}
     annotations: {}
     functions:
