@@ -96,7 +96,8 @@ const personalBestTime = computed(
 
 .difficulty-pb {
   display: flex;
-  column-gap: 1.5rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .top-times {
@@ -113,7 +114,11 @@ const personalBestTime = computed(
   padding: 1.5rem;
   background-color: honeydew;
   border-radius: 0.3rem;
-  flex: 1 1 0;
+  flex: 1 0 0;
+
+  & * {
+    white-space: nowrap;
+  }
 }
 
 .no-top-times {
