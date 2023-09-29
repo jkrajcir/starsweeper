@@ -17,7 +17,7 @@ Starsweeper features include:
 
 - 3 game difficulties:
   - Easy difficulty has a 9x9 board with 10 stars
-  - Normal difficuly has a 16x16 board with 40 stars
+  - Normal difficulty has a 16x16 board with 40 stars
   - Hard difficulty has a 30x16 board with 99 stars
 - Personal best time tracking
   - This is tied to your browser
