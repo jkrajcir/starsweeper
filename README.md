@@ -27,7 +27,7 @@ Starsweeper features include:
 
 ### Why was Starsweeper Made?
 
-I had a knack to implement minesweeper, and I also wanted to learn how to use VueJs, so I put some time into these two desires and created Starsweeper.
+I had a knack to implement minesweeper, and I also wanted to learn how to use Vue.js, so I put some time into these two desires and created Starsweeper.
 
 ### Project Structure and Tech Used to Build Starsweeper
 
@@ -45,7 +45,7 @@ All Projects:
 [`client` Project](./client/):
 
 - Vite front-end tooling
-- VueJs SFCs with TypeScript and SCSS
+- Vue.js SFCs with TypeScript and SCSS
 - Pinia for state management
 - Icons from [Remix Icon](https://remixicon.com/)
 - Favicon from [favicon.io](https://favicon.io/)
