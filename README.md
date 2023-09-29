@@ -27,7 +27,7 @@ Starsweeper features include:
 
 ### Why was Starsweeper Made?
 
-I had a knack to implement minesweeper, and I also wanted to learn how to use Vue.js, so I put some time into these two desires and created Starsweeper.
+I had a knack to implement Minesweeper, and I also wanted to learn how to use Vue.js, so I put some time into these two desires and created Starsweeper. While developing Starsweeper, I thought of adding a leaderboard feature. I used this as an oppurtunity to learn a "simpler" cloud platform(previous personal project experience using Azure), and decided on DigitalOcean's App Platform to host and manage the SPA, serverless functions, and DB.
 
 ### Project Structure and Tech Used to Build Starsweeper
 
