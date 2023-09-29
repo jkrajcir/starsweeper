@@ -72,7 +72,7 @@ Infrastructure:
 - DigitalOcean App Platform to host and manage `client`, `serverless` functions, and Database under one app
 - Deployed using DigitalOcean App Platform's automatic deployment
 
-### How to Install and Run Client Project (serverless project not required, leaderboards won't load)
+### How to Install and Run `client` Project (`serverless` project not required, leaderboards won't load)
 
 #### Monorepo Prettier and ESLint Setup
 
@@ -80,7 +80,7 @@ Infrastructure:
 npm install
 ```
 
-#### Common Project Setup
+#### `common` Project Setup
 
 ```sh
 cd common
@@ -88,7 +88,7 @@ npm install
 npm run build
 ```
 
-#### Client Project Setup
+#### `client` Project Setup
 
 ```sh
 cd client
