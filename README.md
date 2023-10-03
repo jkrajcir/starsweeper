@@ -70,7 +70,7 @@ Infrastructure:
 
 - GitHub Actions for CI workflows
   - CI workflow for both `client` and `serverless` projects, which run when a PR is opened
-- DigitalOcean App Platform to host and manage `client`, `serverless` functions, and Database under one app
+- DigitalOcean App Platform to host and manage `client`, `serverless` functions, and database under one app
 - Deployed using DigitalOcean App Platform's automatic deployment
 
 ### How to Install and Run `client` Project (`serverless` project not required, leaderboards won't load)
