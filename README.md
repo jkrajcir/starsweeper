@@ -41,6 +41,7 @@ All Projects:
 [`common` Project](./common/):
 
 - Project referenced by both `client` and `serverless` projects
+- Contains mainly DTO schema declaration and validation functions
 
 [`client` Project](./client/):
 
